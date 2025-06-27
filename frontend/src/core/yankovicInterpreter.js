@@ -659,6 +659,18 @@ export class YankoviCInterpreter {
             sin: { type: 'NativeFunction', call: (args) => Math.sin(args[0]) },
             cos: { type: 'NativeFunction', call: (args) => Math.cos(args[0]) },
             random_spatula: { type: 'NativeFunction', call: () => Math.floor(Math.random() * 100) },
+            // YOUR BRILLIANT IDEA GOES RIGHT HERE, A BRAND NEW SKILL
+            // A function for modulo, to bend the code to our will!
+            polka_mod: {
+                type: 'NativeFunction',
+                call: (args) => {
+                    const a = args[0];
+                    const b = args[1];
+                    // It's just a remainder, it's not hard to do,
+                    // Now our parser will finally know what to do!
+                    return a % b;
+                }
+            }
         };
         for(const func in mathLib) scope.define(func, mathLib[func]);
     }
