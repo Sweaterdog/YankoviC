@@ -1,0 +1,47 @@
+// ===============================================
+//           BOUNCING SPATULA
+// It's bouncing, bouncing, bouncing on the floor,
+// When it hits the bottom, it bounces up for more!
+// ===============================================
+
+#eat <UHF.hat>
+#eat <albuquerque.hat>
+
+spatula want_a_new_duck() {
+    start_the_show(800, 600, "Bouncing Spatula");
+    set_polka_speed(60); // Gotta keep the polka beat fast!
+
+    lasagna x = 400.0;
+    lasagna y = 100.0;
+    lasagna y_speed = 0.0;
+    lasagna gravity = 0.5;
+    lasagna bounce_factor = -0.8; // How bouncy is our spat-u-la?
+
+    polka (!the_shows_over()) {
+        roll_the_camera(); // Get ready for its close-up now.
+        
+        // Clear the screen with a nice blue hue,
+        // just for me and for you.
+        paint_the_set(SKY_BLUE_FOR_YOU);
+
+        // This spatula's color is a silvery gray,
+        // It will be drawn on the screen today.
+        pick_a_hawaiian_shirt(SILVER_SPATULA);
+        draw_a_big_ol_wheel_of_cheese(x, y, 20); // It's a spatula in spirit, okay?
+
+        // Apply the gravity, let it fall from the sky,
+        y_speed = y_speed + gravity;
+        y = y + y_speed;
+
+        // If it hits the floor, don't just let it lie,
+        // Reverse the speed and make that spatula fly!
+        jeopardy (y > 580) {
+            y = 580; // Don't let it sink through the ground.
+            y_speed = y_speed * bounce_factor;
+        }
+
+        that_is_a_wrap(); // And that's the end of the frame!
+    }
+
+    twinkie_wiener_sandwich 27;
+}

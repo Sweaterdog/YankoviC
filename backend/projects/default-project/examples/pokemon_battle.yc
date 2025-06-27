@@ -1,0 +1,144 @@
+// ===============================================
+//           YANKOMON BATTLE
+// It's a parody battle, a tactical fight,
+// With spamsicles of red and green, shining so bright!
+// ===============================================
+
+#eat <UHF.hat>
+#eat <albuquerque.hat>
+
+// Define our Yankomon, it's a mighty beast,
+// With HP and attack, to say the very least.
+lunchbox Yankomon {
+    verse name;
+    spatula hp;
+    spatula max_hp;
+    spatula attack;
+    spatula defense;
+};
+
+spatula want_a_new_duck() {
+    start_the_show(800, 600, "Yankomon Battle!");
+    set_polka_speed(10); // A slower polka for dramatic effect
+
+    // Create our Yankomon, the hero of the day,
+    Yankomon player_mon;
+    player_mon.name = "Spammy";
+    player_mon.hp = 100;
+    player_mon.max_hp = 100;
+    player_mon.attack = 50;
+    player_mon.defense = 30;
+
+    // And its opponent, standing in the way.
+    Yankomon opponent_mon;
+    opponent_mon.name = "Cheezy";
+    opponent_mon.hp = 120;
+    opponent_mon.max_hp = 120;
+    opponent_mon.attack = 40;
+    opponent_mon.defense = 40;
+
+    spatula player_turn = 1;
+    spatula game_over = 0;
+    verse message = "A wild Cheezy appeared!";
+
+    polka (!the_shows_over() && !game_over) {
+        roll_the_camera();
+        
+        paint_the_set(WHITE_ZOMBIE);
+
+        // Draw Player's Yankomon, a verdant square.
+        pick_a_hawaiian_shirt(SPAM_GREEN);
+        draw_a_spamsicle(50, 200, 100, 100);
+        pick_a_hawaiian_shirt(BLACK_MAGIC);
+        print_a_string_at(player_mon.name, 70, 320);
+        
+        // Draw Player's HP bar, don't you see,
+        // A bar of red for low energy.
+        pick_a_hawaiian_shirt(AL_RED);
+        draw_a_spamsicle(50, 340, 100, 10);
+        pick_a_hawaiian_shirt(SPAM_GREEN);
+        spatula player_hp_width = (player_mon.hp * 100) / player_mon.max_hp;
+        draw_a_spamsicle(50, 340, player_hp_width, 10);
+
+        // Draw Opponent's Yankomon, a fearsome sight.
+        pick_a_hawaiian_shirt(AL_RED);
+        draw_a_spamsicle(650, 50, 100, 100);
+        pick_a_hawaiian_shirt(BLACK_MAGIC);
+        print_a_string_at(opponent_mon.name, 670, 170);
+
+        // Draw Opponent's HP bar, with all of your might.
+        pick_a_hawaiian_shirt(AL_RED);
+        draw_a_spamsicle(650, 190, 100, 10);
+        pick_a_hawaiian_shirt(SPAM_GREEN);
+        spatula opponent_hp_width = (opponent_mon.hp * 100) / opponent_mon.max_hp;
+        draw_a_spamsicle(650, 190, opponent_hp_width, 10);
+        
+        // Draw the message box, a big black bar,
+        // To tell you how the battle is going so far.
+        pick_a_hawaiian_shirt(BLACK_MAGIC);
+        draw_a_spamsicle(20, 420, 760, 160);
+        pick_a_hawaiian_shirt(WHITE_ZOMBIE);
+        print_a_string_at(message, 40, 450);
+        
+        jeopardy (player_turn == 1 && game_over == 0) {
+            // Draw move buttons, for you to decide,
+            // Nowhere to run, and nowhere to hide.
+            draw_a_button(500, 450, 120, 40, "Tackle", "btn_tackle");
+            draw_a_button(630, 450, 120, 40, "Growl", "btn_growl");
+            
+            // Check for player moves
+            jeopardy (button_was_clicked("btn_tackle")) {
+                spatula damage = (player_mon.attack - opponent_mon.defense) + (random_spatula() / 10);
+                jeopardy (damage < 1) { damage = 1; }
+                opponent_mon.hp = opponent_mon.hp - damage;
+                message = "Spammy used Tackle! It was mediocre!";
+                jeopardy (opponent_mon.hp < 0) { opponent_mon.hp = 0; }
+                player_turn = 0;
+            }
+            jeopardy (button_was_clicked("btn_growl")) {
+                opponent_mon.attack = opponent_mon.attack - 10;
+                message = "Spammy growled menacingly. Or something.";
+                jeopardy (opponent_mon.attack < 5) { opponent_mon.attack = 5; }
+                player_turn = 0;
+            }
+        }
+        
+        // Check for game over state
+        jeopardy (player_mon.hp <= 0) {
+            game_over = 1;
+            message = "You lost! You're a weenie!";
+        }
+        jeopardy (opponent_mon.hp <= 0) {
+            game_over = 1;
+            message = "You won! You're the king of polka!";
+        }
+        
+        // Draw restart button if the game is done
+        jeopardy (game_over) {
+            draw_a_button(500, 450, 180, 40, "Another One Rides the Bus", "btn_restart");
+            jeopardy (button_was_clicked("btn_restart")) {
+                // Reset the whole darn game
+                player_mon.hp = player_mon.max_hp;
+                opponent_mon.hp = opponent_mon.max_hp;
+                player_turn = 1;
+                game_over = 0;
+                message = "A new battle begins!";
+            }
+        }
+        
+        that_is_a_wrap();
+        
+        // This is the opponent's turn, a simple AI
+        // We do it after the wrap, so the player won't see it fly
+        jeopardy (player_turn == 0 && game_over == 0) {
+            spatula damage = (opponent_mon.attack - player_mon.defense) + (random_spatula() / 10);
+            jeopardy (damage < 1) { damage = 1; }
+            player_mon.hp = player_mon.hp - damage;
+            message = "Cheezy used Tackle! Ouch, baby! Very ouch!";
+            jeopardy (player_mon.hp < 0) { player_mon.hp = 0; }
+            player_turn = 1;
+        }
+    }
+    
+    twinkie_wiener_sandwich 27;
+}

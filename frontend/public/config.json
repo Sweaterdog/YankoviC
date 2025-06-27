@@ -1,0 +1,66 @@
+{
+  "apiKeys": {
+    "pollinations": "YOUR_POLLINATIONS_API_KEY_OR_NONE",
+    "gemini": "YOUR_GEMINI_API_KEY"
+  },
+  "activeAIService": "pollinations",
+  "aiModels": [
+    { "id": "openai-large", "name": "GPT-4.1" },
+    { "id": "deepseek", "name": "DeepSeek-V3" },
+    { "id": "grok", "name": "Grok 3 Mini" },
+    { "id": "deepseek-reasoning", "name": "DeepSeek-R1" }
+  ],
+  "themes": {
+    "yankovic-dark": {
+      "base": "vs-dark",
+      "inherit": true,
+      "rules": [
+        { "token": "keyword.control.yankovic", "foreground": "c586c0" },
+        { "token": "keyword.type.yankovic", "foreground": "4ec9b0" },
+        { "token": "keyword.return.yankovic", "foreground": "d16969" },
+        { "token": "keyword.const.yankovic", "foreground": "569cd6" },
+        { "token": "function.yankovic", "foreground": "dcdcaa" }
+      ],
+      "colors": { "editor.background": "#1e1e1e" }
+    },
+    "poodle-hat": {
+      "base": "vs-dark",
+      "inherit": false,
+      "rules": [
+        { "token": "", "foreground": "ffffff", "background": "000000" },
+        { "token": "keyword.control.yankovic", "foreground": "ff0000", "fontStyle": "bold" },
+        { "token": "keyword.type.yankovic", "foreground": "ff0000" },
+        { "token": "keyword.return.yankovic", "foreground": "ff0000" },
+        { "token": "keyword.const.yankovic", "foreground": "ff0000" },
+        { "token": "string", "foreground": "e0e0e0" },
+        { "token": "number", "foreground": "e0e0e0" },
+        { "token": "comment", "foreground": "888888", "fontStyle": "italic" },
+        { "token": "identifier", "foreground": "ffffff" },
+        { "token": "function.yankovic", "foreground": "ffffff", "fontStyle": "bold" }
+      ],
+      "colors": {
+        "editor.background": "#000000",
+        "editor.foreground": "#ffffff",
+        "editorCursor.foreground": "#ff0000",
+        "editor.lineHighlightBackground": "#220000"
+      }
+    },
+    "uhf-mode": {
+      "base": "vs",
+      "inherit": true,
+      "rules": [
+        { "token": "keyword.control.yankovic", "foreground": "FF4F00" },
+        { "token": "keyword.type.yankovic", "foreground": "00A9E0" },
+        { "token": "keyword.return.yankovic", "foreground": "9C27B0" },
+        { "token": "keyword.const.yankovic", "foreground": "FFEB3B", "fontStyle": "bold" },
+        { "token": "function.yankovic", "foreground": "4CAF50" },
+        { "token": "string", "foreground": "333333" }
+      ],
+      "colors": {
+        "editor.background": "#E6E6E6",
+        "editor.foreground": "#212121",
+        "editorCursor.foreground": "#FF4F00"
+      }
+    }
+  }
+}

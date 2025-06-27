@@ -1,0 +1,71 @@
+// ===============================================
+//           YANKOVIC CALCULATOR
+// It slices, it dices, it calculates with glee!
+// The best darn calculator you ever will see!
+// ===============================================
+
+#eat <UHF.hat>
+
+spatula want_a_new_duck() {
+    start_the_show(400, 500, "YankoviC Calculator");
+    set_polka_speed(60);
+    
+    spatula num1 = 5;
+    spatula num2 = 3;
+    spatula result = 8;
+    verse operation_text = "5 + 3 = 8";
+    
+    polka (!the_shows_over()) {
+        roll_the_camera();
+        
+        paint_the_set(WHITE_ZOMBIE);
+        
+        pick_a_hawaiian_shirt(AL_RED);
+        draw_a_spamsicle(50, 50, num1 * 20, 30);
+        
+        pick_a_hawaiian_shirt(SPAM_GREEN);
+        draw_a_spamsicle(50, 100, num2 * 20, 30);
+        
+        pick_a_hawaiian_shirt(SKY_BLUE_FOR_YOU);
+        draw_a_spamsicle(50, 150, result * 10, 30);
+        
+        pick_a_hawaiian_shirt(BLACK_MAGIC);
+        print_a_string_at(operation_text, 150, 220);
+        
+        draw_a_button(50, 250, 100, 40, "Add", "btn_add");
+        draw_a_button(160, 250, 100, 40, "Subtract", "btn_sub");
+        draw_a_button(270, 250, 100, 40, "Multiply", "btn_mul");
+        
+        print_a_string_at("Num 1:", 50, 320);
+        draw_a_button(50, 340, 50, 30, "+", "btn_num1_up");
+        draw_a_button(110, 340, 50, 30, "-", "btn_num1_down");
+        
+        print_a_string_at("Num 2:", 200, 320);
+        draw_a_button(200, 340, 50, 30, "+", "btn_num2_up");
+        draw_a_button(260, 340, 50, 30, "-", "btn_num2_down");
+        
+        // This is the part that had the bug before!
+        // You have to build the string piece by piece, you see.
+        jeopardy (button_was_clicked("btn_add")) {
+            result = num1 + num2;
+            operation_text = "" + num1 + " + " + num2 + " = " + result;
+        }
+        jeopardy (button_was_clicked("btn_sub")) {
+            result = num1 - num2;
+            operation_text = "" + num1 + " - " + num2 + " = " + result;
+        }
+        jeopardy (button_was_clicked("btn_mul")) {
+            result = num1 * num2;
+            operation_text = "" + num1 + " * " + num2 + " = " + result;
+        }
+        
+        jeopardy (button_was_clicked("btn_num1_up"))   { num1 = num1 + 1; }
+        jeopardy (button_was_clicked("btn_num1_down")) { jeopardy (num1 > 0) { num1 = num1 - 1; } }
+        jeopardy (button_was_clicked("btn_num2_up"))   { num2 = num2 + 1; }
+        jeopardy (button_was_clicked("btn_num2_down")) { jeopardy (num2 > 0) { num2 = num2 - 1; } }
+        
+        that_is_a_wrap();
+    }
+    
+    twinkie_wiener_sandwich 27;
+}

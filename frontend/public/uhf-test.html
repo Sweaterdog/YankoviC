@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UHF Test</title>
+</head>
+<body>
+    <h1>UHF Test Page</h1>
+    <button id="testBtn">Test UHF</button>
+    <div id="log"></div>
+    
+    <script>
+        const log = document.getElementById('log');
+        function addLog(message) {
+            log.innerHTML += '<div>' + message + '</div>';
+            console.log(message);
+        }
+        
+        document.getElementById('testBtn').addEventListener('click', async () => {
+            addLog('Testing UHF functionality...');
+            
+            if (typeof window !== 'undefined' && window.uhfAPI) {
+                addLog('UHF API is available');
+                
+                try {
+                    // Test starting the show
+                    const result = await window.uhfAPI.startTheShow({width: 400, height: 300, title: "Test Window"});
+                    addLog('Start show result: ' + result);
+                    
+                    // Test drawing a simple frame
+                    const testCommands = [
+                        {command: 'paint_set', args: {r: 255, g: 0, b: 0, a: 255}}, // Red background
+                        {command: 'pick_shirt', args: {r: 0, g: 255, b: 0, a: 255}}, // Green color
+                        {command: 'draw_cheese', args: [200, 150, 50]} // Circle in center
+                    ];
+                    
+                    const drawResult = await window.uhfAPI.executeDrawBuffer(testCommands);
+                    addLog('Execute draw buffer result: ' + drawResult);
+                } catch (error) {
+                    addLog('UHF test error: ' + error);
+                }
+            } else {
+                addLog('UHF API not available - running in non-Electron environment');
+            }
+        });
+    </script>
+</body>
+</html>
