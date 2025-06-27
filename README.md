@@ -379,11 +379,11 @@ spatula want_a_new_duck() {
 
 ## 📖 Example Programs
 
-### Hello World
+### Dare To Be Stupid
 
 ```yankovic
 spatula want_a_new_duck() {
-    perform_a_parody("Hello, Weird World!\\n");
+    perform_a_parody("Hello, Weird World!\\n\\nDare to be stupid!");
     twinkie_wiener_sandwich 27;
 }
 ```
