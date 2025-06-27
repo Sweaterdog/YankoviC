@@ -186,7 +186,7 @@ polka (!the_shows_over()) {
 |----------|-------------|---------|
 | `+` `-` `*` `/` `%` | Arithmetic | `result = a + b * c % d;` |
 | `==` `!=` `<` `>` `<=` `>=` | Comparison | `jeopardy (x == 42)` |
-| `&&` `||` `!` | Logical | `jeopardy (x > 0 && y < 10)` |
+| `&&` `!` | Logical | `jeopardy (x > 0 && y < 10)` |
 | `=` | Assignment | `x = 5;` |
 
 ## 📚 Standard Libraries
