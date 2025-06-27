@@ -4,6 +4,13 @@
 
 Welcome to **YankoviC**, the most ridiculously awesome programming language inspired by the legendary "Weird Al" Yankovic! YankoviC combines the power of structured programming with the whimsy of polka music and the humor of the world's greatest musical parodist.
 
+>  # Please note!
+> This is a very early version of YankoviC!
+>
+> Do not expect all code to run perfectly, and expect the need to change some of the interpreters code!
+> 
+> I am doing my best to make this work, since Weird Al is my favorite, but It takes time to make a perfect project!
+
 ## 🎪 Table of Contents
 
 - [🎵 YankoviC Programming Language v1.0.0](#-yankovic-programming-language-v100)
