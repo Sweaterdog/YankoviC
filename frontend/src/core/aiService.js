@@ -432,6 +432,7 @@ RULES:
 4.  Keep completions short and concise (a single line or a small block).
 5. When finished with the code completion, either provide a double newline (\n\n), OR "// Completed request"
 ---
+The Albuquerque Math Library now includes a mod(a, b) function for modulus operations. Use mod() instead of the % operator in YankoviC code.
 ${yankovicDocs}
 `;
 

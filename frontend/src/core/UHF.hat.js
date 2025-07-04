@@ -188,6 +188,17 @@ export const UHF_LIBRARY = {
     },
     
     // === Mouse and Keyboard (THE NEW STUFF!) ===
+    // === ALBUQUERQUE MATH LIBRARY ===
+    // For modulus, you need a function, not a sign
+    // So use mod(a, b) and you'll do just fine!
+    mod: {
+        type: 'NativeFunction',
+        call: function(args) {
+            const a = args[0];
+            const b = args[1];
+            return ((a % b) + b) % b;
+        }
+    },
     // These functions were missing, a terrible gaffe,
     // Now your programs can react, on your behalf!
     mouse_was_clicked: {

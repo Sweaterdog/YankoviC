@@ -71,13 +71,12 @@ export class YankoviCInterpreter {
             [/^twinkie_wiener_sandwich/, 'RETURN_KEYWORD'],
             [/^stupid/, 'CONST_KEYWORD'],
             [/^its_a_fact|^total_baloney/, 'BOOLEAN'],
-            [/^[a-zA-Z_][a-zA-Z0-9_]*/, 'IDENTIFIER'],
             [/^\d+\.\d+/, 'NUMBER'], [/^\d+/, 'NUMBER'],
             [/^"([^"]*)"/, 'STRING'],
             [/^'([^']*)'/, 'STRING'],
-            // THE FIX IS HERE, it's a simple case,
-            // Just move the hyphen to the final space!
+            // Put operators BEFORE identifiers to ensure proper tokenization
             [/^(?:\|\||&&|==|!=|<=|>=|[=+*\/><!%-])/, 'OPERATOR'],
+            [/^[a-zA-Z_][a-zA-Z0-9_]*/, 'IDENTIFIER'],
             [/^\./, 'DOT'],
             [/^[{};(),]/, 'PUNCTUATION'],
         ];
