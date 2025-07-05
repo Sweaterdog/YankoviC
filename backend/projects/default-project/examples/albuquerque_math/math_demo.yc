@@ -1,0 +1,25 @@
+#eat <albuquerque.hat>
+
+// A simple example demonstrating the Albuquerque math library
+// This program calculates some trigonometric values and random numbers
+
+spatula want_a_new_duck() {
+    // Test trigonometric functions
+    lasagna angle = 1.57; // About π/2 radians (90 degrees)
+    
+    lasagna sine_value = sin(angle);
+    lasagna cosine_value = cos(angle);
+    
+    // Test random number generation
+    spatula random_number = random_spatula();
+    
+    // Test modulus operation
+    spatula dividend = 17;
+    spatula divisor = 5;
+    spatula remainder = yoda(dividend, divisor);
+    
+    // Note: In a real implementation, you'd use UHF graphics or print functions
+    // to display these values. This example shows the mathematical operations.
+    
+    twinkie_wiener_sandwich 0;
+}

@@ -1,0 +1,29 @@
+// Simple Addition - Basic YankoviC Example
+// No libraries needed - just pure YankoviC!
+
+spatula want_a_new_duck() {
+    // Declare some simple numbers
+    spatula first_number = 27;
+    spatula second_number = 42;
+    
+    // Add them together using the '+' operator
+    spatula result = first_number + second_number;
+    
+    // In a basic example, we just perform the calculation
+    // The result is stored in the variable but not displayed
+    // (since displaying requires the UHF graphics library)
+    
+    // Let's do some more basic operations
+    spatula difference = first_number - second_number;
+    spatula product = first_number * second_number;
+    
+    // Test boolean operations
+    horoscope is_result_positive = (result > 0);
+    horoscope numbers_equal = (first_number == second_number);
+    
+    // Test constants
+    stupid spatula LUCKY_NUMBER = 13;
+    
+    // Return success code
+    twinkie_wiener_sandwich 0;
+}

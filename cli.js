@@ -141,6 +141,45 @@ async function main() {
   
   const code = fs.readFileSync(filePath, 'utf-8');
   const interpreter = new YankoviCInterpreter();
+  
+  // Inject file system and browser opening capabilities for web development
+  global.yankovicFileAPI = {
+    writeFile: (filepath, content) => {
+      try {
+        const fullPath = path.resolve(filepath);
+        const dir = path.dirname(fullPath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+        fs.writeFileSync(fullPath, content);
+        return fullPath;
+      } catch (error) {
+        throw new Error(`Failed to write file: ${error.message}`);
+      }
+    },
+    deleteFile: (filepath) => {
+      try {
+        if (fs.existsSync(filepath)) {
+          fs.unlinkSync(filepath);
+          return true;
+        }
+        return false;
+      } catch (error) {
+        throw new Error(`Failed to delete file: ${error.message}`);
+      }
+    },
+    openInBrowser: (filepath) => {
+      try {
+        const openCommand = process.platform === 'darwin' ? 'open' : 
+                          process.platform === 'win32' ? 'start' : 'xdg-open';
+        spawn(openCommand, [filepath], { detached: true, stdio: 'ignore' }).unref();
+        return true;
+      } catch (error) {
+        throw new Error(`Failed to open browser: ${error.message}`);
+      }
+    }
+  };
+  
   let renderer = null;
   
   if (channel !== UHF_CHANNELS.HEADLESS) {

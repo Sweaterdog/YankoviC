@@ -40,9 +40,11 @@ export class CLIGraphicsRenderer {
         this.currentColor = '#FFFFFF';
         this.outputDir = './cli_output';
         
-        // Ensure output directory exists
-        if (!fs.existsSync(this.outputDir)) {
+        // Ensure output directory exists only for PNG mode
+        if (this.channel === UHF_CHANNELS.PNG) {
+          if (!fs.existsSync(this.outputDir)) {
             fs.mkdirSync(this.outputDir, { recursive: true });
+          }
         }
         
         console.log(`[UHF] Tuned to Channel ${this.getChannelNumber()} - ${this.getChannelName()}`);

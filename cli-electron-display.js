@@ -125,6 +125,13 @@ ipcMain.handle('display-frame', (event, imageData) => {
 const frameDir = process.argv[2] || './cli_output';
 console.log(`[UHF Channel 62] Monitoring for frames in: ${frameDir}`);
 
+// Ensure output directory exists only when needed
+if (channel === UHF_CHANNELS.PNG || channel === UHF_CHANNELS.ELECTRON) {
+  if (!fs.existsSync(frameDir)) {
+    fs.mkdirSync(frameDir, { recursive: true });
+  }
+}
+
 // Watch for new PNG files and display them
 if (fs.existsSync(frameDir)) {
   fs.watch(frameDir, (eventType, filename) => {

@@ -3,6 +3,8 @@
 // that correctly handles all forms of declarations and expressions.
 import { getFileContent } from './fileApiService.js';
 import { UHF_LIBRARY, flushDrawCommands } from './UHF.hat.js';
+import { LIKE_A_SERVER_LIBRARY } from './Like_a_Server.hat.js';
+import { WEIRD_WIDE_WEB_LIBRARY } from './Weird_Wide_Web.hat.js';
 
 console.log('=== YANKOVIC INTERPRETER LOADED v2024-07-05-YODA-RENAME-v3 ===');
 console.log('UHF_LIBRARY keys:', Object.keys(UHF_LIBRARY));
@@ -60,8 +62,10 @@ export class YankoviCInterpreter {
 
     lexer(code) {
         const tokenRegexes = [
-            [/^\s+/, null], [/^\/\/.*/, null], [/\/\*[\s\S]*?\*\//, null],
-            [/^#eat\s*(<.*?>|".*?")/, 'DIRECTIVE'], 
+            [/^\s+/, null], 
+            [/^\/\/.*/, null], 
+            [/\/\*[\s\S]*?\*\//, null],
+            [/^#eat\s*(<.*?>|".*?"|[a-zA-Z_][a-zA-Z0-9_]*\.hat)/, 'DIRECTIVE'], 
             [/^lunchbox/, 'LUNCHBOX_KEYWORD'],
             [/^on_the_menu|^private_stash/, 'VISIBILITY_KEYWORD'],
             [/^spatula|^lasagna|^lyric|^verse|^horoscope|^accordion_solo/, 'TYPE_KEYWORD'],
@@ -634,7 +638,23 @@ export class YankoviCInterpreter {
         for(const func in inputLib) scope.define(func, inputLib[func]);
     }
 
-        async processImport(directive, scope) {
+    loadLikeAServer(scope) {
+        console.log('[Interpreter] Loading Like_a_Server library');
+        for (const [funcName, funcDef] of Object.entries(LIKE_A_SERVER_LIBRARY)) {
+            scope.define(funcName, funcDef);
+        }
+        console.log('[Interpreter] Loaded', Object.keys(LIKE_A_SERVER_LIBRARY).length, 'Like_a_Server functions');
+    }
+
+    loadWeirdWideWeb(scope) {
+        console.log('[Interpreter] Loading Weird_Wide_Web library');
+        for (const [funcName, funcDef] of Object.entries(WEIRD_WIDE_WEB_LIBRARY)) {
+            scope.define(funcName, funcDef);
+        }
+        console.log('[Interpreter] Loaded', Object.keys(WEIRD_WIDE_WEB_LIBRARY).length, 'Weird_Wide_Web functions');
+    }
+
+    async processImport(directive, scope) {
         // --- THIS IS THE FIX ---
         // If library overrides are present, we are in a special execution context
         // (like the --electron CLI runner) where all necessary functions are already
@@ -645,15 +665,21 @@ export class YankoviCInterpreter {
         }
 
         // --- Original logic for IDE and non-electron CLI modes ---
-        const match = directive.value.match(/#eat\s*(?:<(.+?)>|"(.+?)")/);
+        const match = directive.value.match(/#eat\s*(?:<(.+?)>|"(.+?)"|([a-zA-Z_][a-zA-Z0-9_]*\.hat))/);
         if (!match) return;
-        let filePath = match[1] || match[2];
+        let filePath = match[1] || match[2] || match[3];
 
         if (filePath === 'UHF.hat') {
             return this.loadUHF(scope);
         }
         if (filePath === 'albuquerque.hat') {
             return this.loadMath(scope);
+        }
+        if (filePath === 'like_a_server.hat') {
+            return this.loadLikeAServer(scope);
+        }
+        if (filePath === 'weird_wide_web.hat') {
+            return this.loadWeirdWideWeb(scope);
         }
 
         if (this.imports.has(filePath)) return;

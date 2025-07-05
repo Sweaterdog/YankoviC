@@ -77,9 +77,6 @@ function createWindow() {
     // Load the dedicated HTML file for the CLI runner
     mainWindow.loadFile(path.join(__dirname, 'cli-runner.html'));
 
-    // Temporarily open dev tools to see console output
-    mainWindow.webContents.openDevTools();
-
     // Prevent window from closing immediately
     mainWindow.on('close', (event) => {
         console.log('[CLI-RUNNER] Window attempting to close');
