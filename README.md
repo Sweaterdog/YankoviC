@@ -264,6 +264,7 @@ Import with: `#eat <albuquerque.hat>`
 spatula random_spatula();                    // Random number 0-99
 lasagna sin(lasagna angle);                  // Sine function
 lasagna cos(lasagna angle);                  // Cosine function
+spatula yoda(spatula a, spatula b);          // Modulus operation (remainder)
 // More functions coming in future versions!
 ```
 

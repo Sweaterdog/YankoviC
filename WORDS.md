@@ -58,4 +58,4 @@ For when you need to do some number crunching on your way to the Donut Shop.
 | `sin(angle)` | `sin(angle)` from `<cmath>` | Calculates the sine of an angle (in radians). A standard, just like coleslaw. |
 | `cos(angle)` | `cos(angle)` from `<cmath>` | Calculates the cosine of an angle (in radians). |
 | `random_spatula()` | `rand() % 100` | Returns a random `spatula` (integer) between 0 and 99. |
-| `polka_mod(a, b)` | `a % b` or `fmod(a, b)` | Calculates the remainder of `a` divided by `b`. A necessary function because the parser is a bit shy about the `%` operator. |
+| `yoda(a, b)` | `a % b` or `fmod(a, b)` | Calculates the remainder of `a` divided by `b`. A necessary function because the `%` operator is finicky. |

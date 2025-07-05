@@ -1,35 +1,11 @@
-import * as genAI from '@google/genai';
+// import { GoogleGenerativeAI } from '@google/genai';
 import axios from 'axios';
 
 const POLLINATIONS_URL = 'https://text.pollinations.ai/openai';
 
 // This function now uses the correct import and instantiation
 export async function streamGeminiResponse(messages, tools, config, modelName) {
-  const apiKey = config.apiKeys.gemini;
-  if (!apiKey || apiKey === "YOUR_GEMINI_API_KEY") {
-    throw new Error("Word Crime! Your Gemini API key is missing from public/config.json.");
-  }
-
-  // THE FIX IS HERE:
-  // 1. We use the namespace import `genAI`.
-  // 2. We instantiate the class using `genAI.default`.
-  const googleAI = new genAI.default(apiKey);
-
-  const geminiTools = [{ functionDeclarations: tools.map(t => t.function) }];
-  
-  const model = googleAI.getGenerativeModel({
-    model: modelName,
-    tools: geminiTools,
-    systemInstruction: messages.find(m => m.role === 'system')?.content || '',
-  });
-
-  const history = messages.filter(m => m.role === 'user' || m.role === 'assistant').slice(0, -1);
-  const lastMessage = messages[messages.length - 1].content;
-  
-  const chat = model.startChat({ history });
-  const result = await chat.sendMessageStream(lastMessage);
-  
-  return result.stream;
+  throw new Error("Gemini integration temporarily disabled for build compatibility");
 }
 
 export async function streamPollinationsResponse(messages, tools, config, modelName) {
@@ -432,7 +408,7 @@ RULES:
 4.  Keep completions short and concise (a single line or a small block).
 5. When finished with the code completion, either provide a double newline (\n\n), OR "// Completed request"
 ---
-The Albuquerque Math Library now includes a mod(a, b) function for modulus operations. Use mod() instead of the % operator in YankoviC code.
+The Albuquerque Math Library now includes a yoda(a, b) function for modulus operations. Use yoda() instead of the % operator in YankoviC code.
 ${yankovicDocs}
 `;
 

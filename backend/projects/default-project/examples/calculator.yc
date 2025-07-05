@@ -39,11 +39,11 @@ spatula want_a_new_duck() {
         
         print_a_string_at("Num 1:", 50, 320);
         draw_a_button(50, 340, 50, 30, "+", "btn_num1_up");
-        draw_a_button(110, 340, 50, 30, "-", "btn_num1_down");
+        draw_a_button(110, 340, 50, 30, "−", "btn_num1_down");
         
         print_a_string_at("Num 2:", 200, 320);
         draw_a_button(200, 340, 50, 30, "+", "btn_num2_up");
-        draw_a_button(260, 340, 50, 30, "-", "btn_num2_down");
+        draw_a_button(260, 340, 50, 30, "−", "btn_num2_down");
         
         // This is the part that had the bug before!
         // You have to build the string piece by piece, you see.
@@ -60,8 +60,8 @@ spatula want_a_new_duck() {
             operation_text = "" + num1 + " * " + num2 + " = " + result;
         }
         jeopardy (button_was_clicked("btn_mod")) {
-            result = mod(num1, num2);
-            operation_text = "" + num1 + " mod " + num2 + " = " + result;
+            result = yoda(num1, num2);
+            operation_text = "" + num1 + " yoda " + num2 + " = " + result;
         }
         
         jeopardy (button_was_clicked("btn_num1_up"))   { num1 = num1 + 1; }

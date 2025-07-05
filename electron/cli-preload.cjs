@@ -1,5 +1,17 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
+contextBridge.exposeInMainWorld('cliAPI', {
+    // Renderer to Main
+    setWindow: (args) => ipcRenderer.invoke('cli-set-window', args),
+
+    // Main to Renderer
+    onRunCode: (callback) => {
+        // Pass both parameters from the main process to the callback
+        ipcRenderer.on('run-code', (event, { code, rendererURL }) => callback(code, rendererURL));
+    },
+});
+
+// Expose UHF API for graphics programs
 contextBridge.exposeInMainWorld('uhfAPI', {
   // Renderer to Main (Invoke)
   startTheShow: (args) => ipcRenderer.invoke('UHF:start_the_show', args),
@@ -11,23 +23,16 @@ contextBridge.exposeInMainWorld('uhfAPI', {
 
   // Main to Renderer (Receive)
   on: (channel, callback) => {
-    // ---> NEW: Add the new channel to the valid list
-    const validChannels = ['UHF:run_frame', 'UHF:show-is-over', 'UHF:ui-state-update', 'run-cli-file'];
+    const validChannels = ['UHF:run_frame', 'UHF:show-is-over', 'UHF:ui-state-update'];
     if (validChannels.includes(channel)) {
       ipcRenderer.on(channel, callback);
     }
   },
   
   removeListener: (channel, callback) => {
-    const validChannels = ['UHF:run_frame', 'UHF:show-is-over', 'UHF:ui-state-update', 'run-cli-file'];
+    const validChannels = ['UHF:run_frame', 'UHF:show-is-over', 'UHF:ui-state-update'];
     if (validChannels.includes(channel)) {
       ipcRenderer.removeListener(channel, callback);
     }
-  }
-});
-
-contextBridge.exposeInMainWorld('electronAPI', {
-  onUIStateUpdate: (callback) => {
-    ipcRenderer.on('UHF:ui-state-update', (event, state) => callback(state));
   }
 });

@@ -57,16 +57,12 @@ ipcRenderer.on('UHF:draw-on-canvas', (event, buffer) => {
                 break;
                 
             case 'paint_set':
-                // THE FIRST FIX IS RIGHT HERE, IT'S A FACT
-                // We unbox the color object, to be exact!
                 const [bg] = cmd.args; 
                 ctx.fillStyle = `rgba(${bg.r}, ${bg.g}, ${bg.b}, ${bg.a / 255})`;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 break;
             
             case 'pick_shirt':
-                // AND THE SECOND FIX IS JUST THE SAME, YOU SEE
-                // Take the first element, set it free!
                 const [tint] = cmd.args;
                 currentFillStyle = `rgba(${tint.r}, ${tint.g}, ${tint.b}, ${tint.a / 255})`;
                 break;
@@ -116,21 +112,17 @@ ipcRenderer.on('UHF:draw-on-canvas', (event, buffer) => {
                 const [tbX, tbY, tbWidth, tbHeight, placeholder, tbId] = cmd.args;
                 console.log('[UHF Renderer] Drawing text box:', tbId, 'at', tbX, tbY);
                 
-                // Store text box for interaction (simplified - in a real implementation, you'd need input handling)
                 if (!uiElements.textBoxes[tbId]) {
                     uiElements.textBoxes[tbId] = { x: tbX, y: tbY, width: tbWidth, height: tbHeight, value: "" };
                 }
                 
-                // Draw text box background
                 ctx.fillStyle = '#fff';
                 ctx.fillRect(tbX, tbY, tbWidth, tbHeight);
                 
-                // Draw text box border
                 ctx.strokeStyle = '#999';
                 ctx.lineWidth = 1;
                 ctx.strokeRect(tbX, tbY, tbWidth, tbHeight);
                 
-                // Draw placeholder text
                 ctx.fillStyle = '#999';
                 ctx.font = '14px Arial';
                 ctx.fillText(placeholder || "Enter text...", tbX + 5, tbY + tbHeight/2 + 5);
@@ -140,21 +132,17 @@ ipcRenderer.on('UHF:draw-on-canvas', (event, buffer) => {
                 const [cbX, cbY, cbSize, label, cbId, checked] = cmd.args;
                 console.log('[UHF Renderer] Drawing checkbox:', cbId, 'at', cbX, cbY);
                 
-                // Store checkbox for interaction
                 if (!uiElements.checkboxes[cbId]) {
                     uiElements.checkboxes[cbId] = { x: cbX, y: cbY, size: cbSize, checked: checked || false };
                 }
                 
-                // Draw checkbox background
                 ctx.fillStyle = '#fff';
                 ctx.fillRect(cbX, cbY, cbSize, cbSize);
                 
-                // Draw checkbox border
                 ctx.strokeStyle = '#999';
                 ctx.lineWidth = 1;
                 ctx.strokeRect(cbX, cbY, cbSize, cbSize);
                 
-                // Draw checkmark if checked
                 if (checked) {
                     ctx.strokeStyle = '#000';
                     ctx.lineWidth = 2;
@@ -165,7 +153,6 @@ ipcRenderer.on('UHF:draw-on-canvas', (event, buffer) => {
                     ctx.stroke();
                 }
                 
-                // Draw label
                 ctx.fillStyle = '#000';
                 ctx.font = '14px Arial';
                 ctx.fillText(label, cbX + cbSize + 10, cbY + cbSize/2 + 5);
@@ -175,16 +162,13 @@ ipcRenderer.on('UHF:draw-on-canvas', (event, buffer) => {
                 const [slX, slY, slWidth, minVal, maxVal, currentVal, slId] = cmd.args;
                 console.log('[UHF Renderer] Drawing slider:', slId, 'at', slX, slY);
                 
-                // Store slider for interaction
                 if (!uiElements.sliders[slId]) {
                     uiElements.sliders[slId] = { x: slX, y: slY, width: slWidth, min: minVal, max: maxVal, value: currentVal };
                 }
                 
-                // Draw slider track
                 ctx.fillStyle = '#ddd';
                 ctx.fillRect(slX, slY + 10, slWidth, 5);
                 
-                // Draw slider handle
                 const handlePos = slX + ((currentVal - minVal) / (maxVal - minVal)) * slWidth;
                 ctx.fillStyle = '#666';
                 ctx.beginPath();
@@ -197,7 +181,6 @@ ipcRenderer.on('UHF:draw-on-canvas', (event, buffer) => {
         }
     }
     
-    // Send UI state back to the main process for the interpreter
     ipcRenderer.send('UHF:ui-state', {
         mouse: mouseState,
         keys: keyState,

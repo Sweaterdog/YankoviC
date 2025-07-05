@@ -4,6 +4,7 @@ const path = require('path');
 let mainWindow;
 let uhfWindow = null;
 let gameLoopInterval = null;
+let uiState = { mouse: {}, keys: {}, buttons: {}, textBoxes: {}, checkboxes: {}, sliders: {} };
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({
@@ -15,7 +16,10 @@ function createMainWindow() {
       nodeIntegration: false,
     },
   });
+
+  // Normal IDE mode - loads the Vite dev server
   mainWindow.loadURL('http://localhost:5173');
+  // mainWindow.webContents.openDevTools(); // <-- REMOVED
   mainWindow.on('closed', () => { mainWindow = null; });
 }
 
@@ -26,9 +30,13 @@ app.on('activate', () => { if (mainWindow === null) createMainWindow(); });
 // --- IPC Handlers ---
 
 ipcMain.handle('UHF:start_the_show', (event, { width, height, title }) => {
-  if (uhfWindow) { uhfWindow.close(); }
-  if (gameLoopInterval) { clearInterval(gameLoopInterval); gameLoopInterval = null; }
+  console.log('[Main Process] UHF:start_the_show called with:', { width, height, title });
+  if (uhfWindow) { 
+    console.log('[Main Process] Closing existing UHF window');
+    uhfWindow.close(); 
+  }
   
+  console.log('[Main Process] Creating new UHF window');
   uhfWindow = new BrowserWindow({
     width, height, title, parent: mainWindow,
     webPreferences: {
@@ -37,32 +45,29 @@ ipcMain.handle('UHF:start_the_show', (event, { width, height, title }) => {
     }
   });
 
+  console.log('[Main Process] Loading UHF window HTML');
   uhfWindow.loadFile(path.join(__dirname, 'uhfWindow.html'));
+  // uhfWindow.webContents.openDevTools(); // <-- REMOVED
 
   uhfWindow.on('close', () => {
-    if (gameLoopInterval) clearInterval(gameLoopInterval);
-    gameLoopInterval = null;
-    if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send('UHF:show-is-over');
-    }
-    uhfWindow = null;
+      console.log('[Main Process] UHF window closed by user.');
+      if (gameLoopInterval) clearInterval(gameLoopInterval);
+      gameLoopInterval = null;
+      if (mainWindow && !mainWindow.isDestroyed()) {
+          console.log('[Main Process] Sending show-is-over to main window');
+          mainWindow.webContents.send('UHF:show-is-over');
+      }
+      uhfWindow = null;
   });
+  console.log('[Main Process] UHF window setup complete');
   return true;
 });
 
-// THIS IS THE CRITICAL FIX FOR THE FPS
-// This handler now properly respects the polka speed.
 ipcMain.handle('UHF:start_game_loop', (event, fps) => {
     if (gameLoopInterval) clearInterval(gameLoopInterval);
-    
-    // We calculate the delay from the frames per second
-    // So your animations are smooth, and not a big mess.
     const frameTime = 1000 / fps;
-    
     gameLoopInterval = setInterval(() => {
         if (mainWindow && !mainWindow.isDestroyed()) {
-            // Every tick of our new, controlled clock
-            // We tell the IDE it's time to polka-rock.
             mainWindow.webContents.send('UHF:run_frame');
         } else {
             clearInterval(gameLoopInterval);
@@ -73,6 +78,7 @@ ipcMain.handle('UHF:start_game_loop', (event, fps) => {
 });
 
 ipcMain.handle('UHF:cancel_the_show', () => {
+    console.log('[Main Process] Received cancel_the_show.');
     if (gameLoopInterval) clearInterval(gameLoopInterval);
     if (uhfWindow) uhfWindow.close();
     gameLoopInterval = null;
@@ -91,7 +97,12 @@ ipcMain.handle('UHF:is_the_show_over', () => {
 });
 
 ipcMain.on('UHF:ui-state', (event, newUiState) => {
+    uiState = { ...uiState, ...newUiState };
     if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send('UHF:ui-state-update', newUiState);
+        mainWindow.webContents.send('UHF:ui-state-update', uiState);
     }
+});
+
+ipcMain.handle('UHF:get_ui_state', () => {
+    return uiState;
 });

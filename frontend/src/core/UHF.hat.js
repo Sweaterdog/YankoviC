@@ -154,7 +154,7 @@ export const UHF_LIBRARY = {
     },
     button_was_clicked: {
         type: 'NativeFunction',
-        call: (args) => {
+        call: function(args) {
             const buttonId = args[0];
             // To know if a button was pressed, just ask the UI state
             // It'll tell you the answer, you won't have to wait!
@@ -176,7 +176,9 @@ export const UHF_LIBRARY = {
     },
     get_checkbox_value: {
         type: 'NativeFunction',
-        call: (args) => this.uiState?.checkboxes?.[args[0]]?.checked || false
+        call: function(args) { 
+            return this.uiState?.checkboxes?.[args[0]]?.checked || false;
+        }
     },
     draw_a_slider: { 
         type: 'NativeFunction', 
@@ -184,14 +186,17 @@ export const UHF_LIBRARY = {
     },
     get_slider_value: {
         type: 'NativeFunction',
-        call: (args) => this.uiState?.sliders?.[args[0]]?.value || 0
+        call: function(args) { 
+            return this.uiState?.sliders?.[args[0]]?.value || 0;
+        }
     },
     
     // === Mouse and Keyboard (THE NEW STUFF!) ===
     // === ALBUQUERQUE MATH LIBRARY ===
+    // === ALBUQUERQUE MATH LIBRARY ===
     // For modulus, you need a function, not a sign
-    // So use mod(a, b) and you'll do just fine!
-    mod: {
+    // So use yoda(a, b) and you'll do just fine!
+    yoda: {
         type: 'NativeFunction',
         call: function(args) {
             const a = args[0];
@@ -203,19 +208,25 @@ export const UHF_LIBRARY = {
     // Now your programs can react, on your behalf!
     mouse_was_clicked: {
         type: 'NativeFunction',
-        call: () => {
+        call: function() {
             const clicked = this.uiState?.mouse?.clicked || false;
-            if (clicked) this.uiState.mouse.clicked = false; // Consume the click, don't be a louse.
+            if (clicked && this.uiState?.mouse) {
+                this.uiState.mouse.clicked = false; // Consume the click
+            }
             return clicked;
         }
     },
     get_mouse_x: {
         type: 'NativeFunction',
-        call: () => this.uiState?.mouse?.x || 0
+        call: function() {
+            return this.uiState?.mouse?.x || 0;
+        }
     },
     get_mouse_y: {
         type: 'NativeFunction',
-        call: () => this.uiState?.mouse?.y || 0
+        call: function() {
+            return this.uiState?.mouse?.y || 0;
+        }
     },
 
     // === THE AL-MANAC OF COLORS ===
