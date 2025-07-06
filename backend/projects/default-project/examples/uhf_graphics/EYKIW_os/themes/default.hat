@@ -14,7 +14,7 @@ lunchbox Theme {
     spatula taskbar_bg;
     spatula taskbar_text;
     spatula accent_color;
-};
+}
 
 Theme get_default_theme() {
     Theme t;

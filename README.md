@@ -555,3 +555,16 @@ spatula want_a_new_duck() {
     twinkie_wiener_sandwich 27;
 }
 ```
+
+
+### TODO List
+
+This is a list for things that I need to do, but feel free to open a PR with the feature!
+
+| Feature | Description | Why |
+| --- | --- | ---|
+| Reverse Interpeter | Converting Javascript, HTML, CSS, and Python files to YankoviC | Why not port everything to YankoviC? |
+| Try / Except | Add Try / Except with `do_i_creep_you_out` and catching with `creeped_out` | Everything has to work, so a lot of conditionals fail |
+| Sleep | Add a `stop_forwarding_that_crap` to waste time | You will need to have delays eventually |
+| Async | Add `saga_begins` to start an async, awaited with something | You need async and synchronous stuff |
+| More I am sure | I am tired, feel free to add whatever you want. | If it is Weird Al inspired I will probably merge. |

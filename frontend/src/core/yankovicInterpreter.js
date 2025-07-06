@@ -47,6 +47,7 @@ export class YankoviCInterpreter {
         this.imports = new Map();
         this.projectName = 'default-project';
         this.uiState = { mouse: {}, keys: {}, buttons: {}, textBoxes: {}, checkboxes: {}, sliders: {} };
+        this.declaredLunchboxTypes = new Set(); // Track user-defined lunchbox types
 
         // Listen for UI state updates from Electron
         if (typeof window !== 'undefined' && window.electronAPI) {
@@ -113,29 +114,95 @@ export class YankoviCInterpreter {
         // --- All parsing functions ---
     parseProgram() {
         const program = { type: 'Program', body: [] };
+        console.log('[YankoviC Parser] Starting parseProgram, total tokens:', this.tokens.length);
+        // Allow comments and #eat directives anywhere before the first function/lunchbox
         while (this.currentToken().type !== 'EOF') {
-            program.body.push(this.parseTopLevelDeclaration());
+            const currentToken = this.currentToken();
+            console.log('[YankoviC Parser] Processing token at position', this.pos, ':', JSON.stringify(currentToken));
+            
+            // Accept #eat directives and empty statements (comments/whitespace)
+            if (currentToken.type === 'DIRECTIVE' || currentToken.type === 'EmptyStatement') {
+                console.log('[YankoviC Parser] Parsing directive/empty statement');
+                program.body.push(this.parseTopLevelDeclaration());
+                continue;
+            }
+            // Accept function or lunchbox declarations
+            if (currentToken.type === 'LUNCHBOX_KEYWORD' || currentToken.type === 'TYPE_KEYWORD' || currentToken.type === 'VISIBILITY_KEYWORD') {
+                console.log('[YankoviC Parser] Parsing function/lunchbox declaration');
+                program.body.push(this.parseTopLevelDeclaration());
+                continue;
+            }
+            // Check if this is a user-defined lunchbox type used as a return type
+            if (currentToken.type === 'IDENTIFIER' && this.declaredLunchboxTypes.has(currentToken.value)) {
+                console.log('[YankoviC Parser] Parsing function declaration with user-defined return type:', currentToken.value);
+                program.body.push(this.parseTopLevelDeclaration());
+                continue;
+            }
+            // Accept stray semicolons (from comments/whitespace)
+            if (currentToken.value === ';') {
+                console.log('[YankoviC Parser] Skipping semicolon');
+                this.pos++;
+                continue;
+            }
+            // If we see anything else, error
+            console.error('[YankoviC Parser] UNEXPECTED TOKEN at top level:', JSON.stringify(currentToken));
+            console.error('[YankoviC Parser] Position:', this.pos, 'of', this.tokens.length);
+            console.error('[YankoviC Parser] Previous 3 tokens:', this.tokens.slice(Math.max(0, this.pos - 3), this.pos));
+            console.error('[YankoviC Parser] Next 3 tokens:', this.tokens.slice(this.pos + 1, this.pos + 4));
+            console.error('[YankoviC Parser] Declared lunchbox types:', Array.from(this.declaredLunchboxTypes));
+            throw new Error(`Parse Error: Only function, lunchbox, #eat, or comments are allowed at the top level. [Token: ${JSON.stringify(currentToken)}]`);
         }
+        console.log('[YankoviC Parser] parseProgram completed, body length:', program.body.length);
         return program;
     }
 
     parseTopLevelDeclaration() {
         const token = this.currentToken();
-        // console.log('[YankoviC Parser] Parsing top level, current token:', token);
+        console.log('[YankoviC Parser] parseTopLevelDeclaration, current token:', JSON.stringify(token));
+        
         if (token.type === 'DIRECTIVE') { 
+            console.log('[YankoviC Parser] Processing directive:', token.value);
             this.pos++; 
             return { type: 'Directive', value: token.value }; 
         }
-        if (token.type === 'LUNCHBOX_KEYWORD') return this.parseLunchboxDeclaration();
-        if (token.type === 'TYPE_KEYWORD') return this.parseFunctionDeclaration();
-        if (token.type === 'VISIBILITY_KEYWORD') return this.parseFunctionDeclaration();
-        if (token.value === ';') { this.pos++; return { type: 'EmptyStatement' }; }
+        if (token.type === 'LUNCHBOX_KEYWORD') {
+            console.log('[YankoviC Parser] Processing lunchbox declaration');
+            return this.parseLunchboxDeclaration();
+        }
+        if (token.type === 'TYPE_KEYWORD') {
+            console.log('[YankoviC Parser] Processing function declaration with return type');
+            return this.parseFunctionDeclaration();
+        }
+        if (token.type === 'VISIBILITY_KEYWORD') {
+            console.log('[YankoviC Parser] Processing function declaration with visibility');
+            return this.parseFunctionDeclaration();
+        }
+        // Check if this is a user-defined lunchbox type used as a return type
+        if (token.type === 'IDENTIFIER' && this.declaredLunchboxTypes.has(token.value)) {
+            console.log('[YankoviC Parser] Processing function declaration with user-defined return type:', token.value);
+            return this.parseFunctionDeclaration();
+        }
+        if (token.value === ';') { 
+            console.log('[YankoviC Parser] Processing empty statement (semicolon)');
+            this.pos++; 
+            return { type: 'EmptyStatement' }; 
+        }
+        
+        console.error('[YankoviC Parser] UNHANDLED TOKEN in parseTopLevelDeclaration:', JSON.stringify(token));
+        console.error('[YankoviC Parser] Token position:', this.pos, 'of', this.tokens.length);
+        console.error('[YankoviC Parser] Surrounding tokens:', this.tokens.slice(Math.max(0, this.pos - 2), this.pos + 3));
+        console.error('[YankoviC Parser] Declared lunchbox types:', Array.from(this.declaredLunchboxTypes));
         throw new Error(`Parse Error: Only function or lunchbox declarations are allowed at the top level. [Token: ${JSON.stringify(token)}]`);
     }
 
     parseLunchboxDeclaration() {
         this.consume('LUNCHBOX_KEYWORD', 'lunchbox');
         const name = this.consume('IDENTIFIER').value;
+        
+        // Track this lunchbox type for future function declarations
+        this.declaredLunchboxTypes.add(name);
+        console.log('[YankoviC Parser] Registered lunchbox type:', name);
+        
         this.consume('PUNCTUATION', '{');
         const fields = [];
         while(this.currentToken().value !== '}') {
@@ -171,7 +238,19 @@ export class YankoviCInterpreter {
         if (this.currentToken().type === 'VISIBILITY_KEYWORD') {
             visibility = this.consume('VISIBILITY_KEYWORD').value === 'on_the_menu' ? 'public' : 'private';
         }
-        const returnType = this.consume('TYPE_KEYWORD').value;
+        
+        // The return type can be either a TYPE_KEYWORD or a user-defined lunchbox type (IDENTIFIER)
+        let returnType;
+        const currentToken = this.currentToken();
+        if (currentToken.type === 'TYPE_KEYWORD') {
+            returnType = this.consume('TYPE_KEYWORD').value;
+        } else if (currentToken.type === 'IDENTIFIER' && this.declaredLunchboxTypes.has(currentToken.value)) {
+            returnType = this.consume('IDENTIFIER').value;
+            console.log('[YankoviC Parser] Using user-defined return type:', returnType);
+        } else {
+            throw new Error(`Parse Error: Expected return type (built-in or user-defined), got ${currentToken.type}: ${currentToken.value}`);
+        }
+        
         const name = this.consume('IDENTIFIER').value;
         this.consume('PUNCTUATION', '(');
         const params = [];
@@ -673,7 +752,7 @@ export class YankoviCInterpreter {
     }
 
     async processImport(directive, scope) {
-        // console.log('[YankoviC Import] Processing import:', directive.value);
+        console.log('[YankoviC Import] Processing import directive:', directive.value);
         
         // --- THIS IS THE FIX ---
         // If library overrides are present, we are in a special execution context
@@ -686,17 +765,18 @@ export class YankoviCInterpreter {
         }
 
         // --- Original logic for IDE and non-electron CLI modes ---
-        const match = directive.value.match(/#eat\s*(?:<(.+?)>|"(.+?)"|([a-zA-Z_][a-zA-Z0-9_]*\.hat))/);
+        const match = directive.value.match(/#eat\s*(?:<(.+?)>|"(.+?)"|([a-zA-Z_][a-zA-Z0-9_]*\.(?:hat|yc)))/);
         if (!match) {
-            console.log('[YankoviC Import] No match found for directive');
+            console.log('[YankoviC Import] No match found for directive:', directive.value);
             return;
         }
         let filePath = match[1] || match[2] || match[3];
-        // console.log('[YankoviC Import] Extracted filePath:', filePath);
-
+        console.log('[YankoviC Import] Extracted filePath:', filePath);
+        
         // Normalize import name for built-in libraries
-        const normalized = filePath.toLowerCase().replace(/\.hat(\.js)?$/, '');
-        // console.log('[YankoviC Import] Normalized name:', normalized);
+        const normalized = filePath.toLowerCase().replace(/\.(hat|yc)(\.js)?$/, '');
+        console.log('[YankoviC Import] Normalized name:', normalized);
+        
         const builtins = {
             'uhf': () => this.loadUHF(scope),
             'albuquerque': () => this.loadMath(scope),
@@ -704,39 +784,105 @@ export class YankoviCInterpreter {
             'weird_wide_web': () => this.loadWeirdWideWeb(scope),
             'virus_alert': () => this.loadVirusAlert(scope)
         };
-        // console.log('[YankoviC Import] Builtins available:', Object.keys(builtins));
+        
         if (builtins[normalized]) {
-            // console.log(`[YankoviC Import] Loading built-in library: ${normalized}`);
+            console.log('[YankoviC Import] Loading built-in library:', normalized);
             return builtins[normalized]();
         } else {
-            // console.log(`[YankoviC Import] Built-in library not found for: ${normalized}, falling back to user file load.`);
-        }
-
-        // console.log('[YankoviC Import] Attempting to load user file:', filePath);
-        if (this.imports.has(filePath)) {
-            // console.log('[YankoviC Import] File already imported, skipping');
-            return;
-        }
-        this.imports.set(filePath, true);
-        
-        try {
-            // console.log('[YankoviC Import] Getting file content for:', filePath);
-            const content = await getFileContent(this.projectName, filePath);
-            // console.log('[YankoviC Import] File content received, length:', content.length);
-            // console.log('[YankoviC Import] First 100 chars of content:', content.slice(0, 100));
-            const tokens = this.lexer(content);
-            const oldState = { pos: this.pos, tokens: this.tokens };
-            this.tokens = tokens;
-            this.pos = 0;
-            const ast = this.parseProgram();
-            // Interpret the imported file in the current scope
-            await this.interpret(ast, scope);
-            // Restore parser state
-            this.tokens = oldState.tokens;
-            this.pos = oldState.pos;
-        } catch (error) {
-            // console.log('[YankoviC Import] Import error:', error.message);
-            throw new Error(`Import Error: Failed to import '${filePath}': ${error.message}`);
+            console.log('[YankoviC Import] Not a built-in, attempting user file import for:', filePath);
+            
+            // Try .hat first, then .yc for user files
+            let triedHat = false;
+            let triedYc = false;
+            let lastError = null;
+            
+            for (const ext of ['.hat', '.yc']) {
+                if (filePath.endsWith(ext)) {
+                    try {
+                        console.log('[YankoviC Import] Trying file with existing extension:', filePath);
+                        if (this.imports.has(filePath)) {
+                            console.log('[YankoviC Import] File already imported, skipping:', filePath);
+                            return;
+                        }
+                        this.imports.set(filePath, true);
+                        console.log('[YankoviC Import] Fetching content for:', filePath);
+                        const content = await getFileContent(this.projectName, filePath);
+                        console.log('[YankoviC Import] Content received, length:', content.length);
+                        console.log('[YankoviC Import] First 200 chars:', content.slice(0, 200));
+                        
+                        const tokens = this.lexer(content);
+                        console.log('[YankoviC Import] Tokenized, token count:', tokens.length);
+                        console.log('[YankoviC Import] First 10 tokens:', tokens.slice(0, 10));
+                        
+                        const oldState = { pos: this.pos, tokens: this.tokens };
+                        this.tokens = tokens;
+                        this.pos = 0;
+                        
+                        console.log('[YankoviC Import] About to parse imported file...');
+                        const ast = this.parseProgram();
+                        console.log('[YankoviC Import] Parsed successfully, interpreting...');
+                        
+                        await this.interpret(ast, scope);
+                        this.tokens = oldState.tokens;
+                        this.pos = oldState.pos;
+                        console.log('[YankoviC Import] Import completed successfully');
+                        return;
+                    } catch (error) {
+                        console.error('[YankoviC Import] Error importing file:', filePath, error);
+                        lastError = error;
+                        if (ext === '.hat') triedHat = true;
+                        if (ext === '.yc') triedYc = true;
+                    }
+                }
+            }
+            
+            // If not found, try both extensions
+            if (!triedHat) {
+                try {
+                    const hatPath = filePath.replace(/\.(yc)$/, '.hat');
+                    console.log('[YankoviC Import] Trying .hat extension:', hatPath);
+                    if (this.imports.has(hatPath)) return;
+                    this.imports.set(hatPath, true);
+                    const content = await getFileContent(this.projectName, hatPath);
+                    const tokens = this.lexer(content);
+                    const oldState = { pos: this.pos, tokens: this.tokens };
+                    this.tokens = tokens;
+                    this.pos = 0;
+                    const ast = this.parseProgram();
+                    await this.interpret(ast, scope);
+                    this.tokens = oldState.tokens;
+                    this.pos = oldState.pos;
+                    return;
+                } catch (error) { 
+                    console.error('[YankoviC Import] .hat attempt failed:', error);
+                    lastError = error; 
+                }
+            }
+            
+            if (!triedYc) {
+                try {
+                    const ycPath = filePath.replace(/\.(hat)$/, '.yc');
+                    console.log('[YankoviC Import] Trying .yc extension:', ycPath);
+                    if (this.imports.has(ycPath)) return;
+                    this.imports.set(ycPath, true);
+                    const content = await getFileContent(this.projectName, ycPath);
+                    const tokens = this.lexer(content);
+                    const oldState = { pos: this.pos, tokens: this.tokens };
+                    this.tokens = tokens;
+                    this.pos = 0;
+                    const ast = this.parseProgram();
+                    await this.interpret(ast, scope);
+                    this.tokens = oldState.tokens;
+                    this.pos = oldState.pos;
+                    return;
+                } catch (error) { 
+                    console.error('[YankoviC Import] .yc attempt failed:', error);
+                    lastError = error; 
+                }
+            }
+            
+            console.error('[YankoviC Import] All import attempts failed for:', filePath);
+            throw new Error(`Import Error: Failed to import user file '${filePath}': ${lastError ? lastError.message : 'File not found'}`);
         }
     }
 }
