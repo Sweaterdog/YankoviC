@@ -76,7 +76,15 @@ yankovic program.yc
 
 ### Comments
 ```yankovic
-// This is the only valid comment syntax in YankoviC
+// You can do this
+
+/*
+or
+you
+can
+do
+this!
+*/
 ```
 
 ## Tips for Success
