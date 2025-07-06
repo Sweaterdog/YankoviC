@@ -18,13 +18,13 @@ async function main() {
         console.log('🪗 Opening The Accordion IDE...');
         
         // Check if start.sh exists and is executable
-        const startScript = path.join('/home/sweaterdog/Desktop/Coding_projects/YankoviC', 'start.sh');
+        const startScript = path.join(__dirname, 'start.sh');
         
         if (fs.existsSync(startScript)) {
             console.log('🎵 Launching The Accordion IDE with start.sh...');
             
             const child = spawn('./start.sh', [], {
-                cwd: '/home/sweaterdog/Desktop/Coding_projects/YankoviC',
+                cwd: __dirname,
                 stdio: 'inherit',
                 detached: false
             });
