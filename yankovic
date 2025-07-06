@@ -54,38 +54,41 @@ async function main() {
 
     // If no special flags, handle as regular YankoviC CLI
     if (args.length === 0) {
-        console.log('🎵 YankoviC - The Accordion Programming Language 🎵');
-        console.log('');
-        console.log('Usage: yankovic <file.yc> [options]');
-        console.log('       yankovic --accordion    # Open The Accordion IDE');
-        console.log('       yankovic --ide          # Open The Accordion IDE');
-        console.log('');
-        console.log('📺 UHF Channel Options (Display Modes):');
-        console.log('  --channel=1   or --headless   📻 API Mode (No Display)');
-        console.log('  --channel=3   or --ascii      🖥️  Terminal ASCII Display (default)');
-        console.log('  --channel=13  or --png        🖼️  PNG File Output');
-        console.log('  --channel=62  or --electron   📺 Standard Display Mode (Electron)');
-        console.log('');
-        console.log('🎨 ASCII Display Options:');
-        console.log('  --hires                       🌈 High-Resolution Terminal Display');
-        console.log('                                   (24-bit color, Unicode blocks)');
-        console.log('');
-        console.log('⚙️ Other Options:');
-        console.log('  --max-frames=N: Limit number of frames (default: unlimited)');
-        console.log('  --version:      Show version information');
-        console.log('  --help:         Show this help message');
-        console.log('');
-        console.log('🎸 Examples:');
-        console.log('  yankovic calculator.yc --ascii');
-        console.log('  yankovic calculator.yc --ascii --hires');
-        console.log('  yankovic ~/projects/my-app.yc --png');
-        console.log('  yankovic examples/EYKIW_os.yc --electron');
-        console.log('');
-        console.log('🎬 Demo all channels: yankovic-demo');
-        console.log('🪗 Open IDE: yankovic --accordion');
+        printHelp();
         process.exit(1);
     }
 
+function printHelp() {
+    console.log('🎵 YankoviC - The Accordion Programming Language 🎵');
+    console.log('');
+    console.log('Usage: yankovic <file.yc> [options]');
+    console.log('       yankovic --accordion    # Open The Accordion IDE');
+    console.log('       yankovic --ide          # Open The Accordion IDE');
+    console.log('');
+    console.log('📺 UHF Channel Options (Display Modes):');
+    console.log('  --channel=1   or --headless   📻 API Mode (No Display)');
+    console.log('  --channel=3   or --ascii      🖥️  Terminal ASCII Display (default)');
+    console.log('  --channel=13  or --png        🖼️  PNG File Output');
+    console.log('  --channel=62  or --electron   📺 Standard Display Mode (Electron)');
+    console.log('');
+    console.log('🎨 ASCII Display Options:');
+    console.log('  --hires                       🌈 High-Resolution Terminal Display');
+    console.log('                                   (24-bit color, Unicode blocks)');
+    console.log('');
+    console.log('⚙️ Other Options:');
+    console.log('  --max-frames=N: Limit number of frames (default: unlimited)');
+    console.log('  --version:      Show version information');
+    console.log('  --help:         Show this help message');
+    console.log('');
+    console.log('🎸 Examples:');
+    console.log('  yankovic calculator.yc --ascii');
+    console.log('  yankovic calculator.yc --ascii --hires');
+    console.log('  yankovic ~/projects/my-app.yc --png');
+    console.log('  yankovic examples/EYKIW_os.yc --electron');
+    console.log('');
+    console.log('🎬 Demo all channels: yankovic-demo');
+    console.log('🪗 Open IDE: yankovic --accordion');
+}
     // Handle version flag
     if (args.includes('--version')) {
         const packagePath = path.join(__dirname, 'package.json');
