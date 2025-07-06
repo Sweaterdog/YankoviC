@@ -72,10 +72,15 @@ spatula want_a_new_duck() {
 Run the following command to install all dependencies, set up the environment, and add YankoviC to your PATH for global CLI use:
 
 ```bash
-./install.sh
+sudo ./install.sh
 ```
 
 This installer only works for Linux (Maybe MacOS idk), windows users will have to open it up and do it all manually
+
+### To remove from PATH
+```bash
+./uninstall.sh
+```
 
 ### Starting the Accordion IDE
 You can run the accordion anywhere!
