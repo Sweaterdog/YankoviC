@@ -3,8 +3,9 @@ import { getFileContent } from './fileApiService.js';
 import { UHF_LIBRARY, flushDrawCommands } from './UHF.hat.js';
 import { LIKE_A_SERVER_LIBRARY } from './Like_a_Server.hat.js';
 import { WEIRD_WIDE_WEB_LIBRARY } from './Weird_Wide_Web.hat.js';
+import { VIRUS_ALERT_LIBRARY } from './virus_alert.hat.js';
 
-console.log('=== YANKOVIC INTERPRETER LOADED v2024-07-05-YODA-RENAME-v3 ===');
+// console.log('=== YANKOVIC INTERPRETER LOADED v2024-07-06-YODA-RENAME-v4 ===');
 // console.log('UHF_LIBRARY keys:', Object.keys(UHF_LIBRARY));
 
 class Scope {
@@ -88,10 +89,16 @@ export class YankoviCInterpreter {
                 if (result) { match = { value: result[0], type, raw: result[1] }; break; }
             }
             if (!match) throw new Error(`Syntax Error: Unexpected character at position ${position}: ${code[position]}`);
+            if (match.type) {
+                const tokenValue = match.type === 'STRING' ? match.raw || match.value.slice(1, -1) : match.value;
+                const token = { type: match.type, value: tokenValue };
+                tokens.push(token);
+                // console.log('[YankoviC Lexer] Token:', token);
+            }
             position += match.value.length;
-            if (match.type) tokens.push({ type: match.type, value: match.type === 'STRING' ? match.raw || match.value.slice(1, -1) : match.value });
         }
         tokens.push({type: "EOF", value: "EOF"});
+        // console.log('[YankoviC Lexer] All tokens:', tokens);
         return tokens;
     }
 
@@ -114,6 +121,7 @@ export class YankoviCInterpreter {
 
     parseTopLevelDeclaration() {
         const token = this.currentToken();
+        // console.log('[YankoviC Parser] Parsing top level, current token:', token);
         if (token.type === 'DIRECTIVE') { 
             this.pos++; 
             return { type: 'Directive', value: token.value }; 
@@ -122,7 +130,7 @@ export class YankoviCInterpreter {
         if (token.type === 'TYPE_KEYWORD') return this.parseFunctionDeclaration();
         if (token.type === 'VISIBILITY_KEYWORD') return this.parseFunctionDeclaration();
         if (token.value === ';') { this.pos++; return { type: 'EmptyStatement' }; }
-        throw new Error(`Parse Error: Only function or lunchbox declarations are allowed at the top level.`);
+        throw new Error(`Parse Error: Only function or lunchbox declarations are allowed at the top level. [Token: ${JSON.stringify(token)}]`);
     }
 
     parseLunchboxDeclaration() {
@@ -344,6 +352,10 @@ export class YankoviCInterpreter {
                     return val === true ? 'its_a_fact' : val === false ? 'total_baloney' : String(val);
                 });
                 this.log(result);
+                // Print directly to terminal if running in Node.js (CLI)
+                if (typeof process !== 'undefined' && process.stdout && typeof process.stdout.write === 'function') {
+                    process.stdout.write(result + '\n');
+                }
             }
         });
 
@@ -637,54 +649,81 @@ export class YankoviCInterpreter {
     }
 
     loadLikeAServer(scope) {
-        console.log('[Interpreter] Loading Like_a_Server library');
+        // console.log('[Interpreter] Loading Like_a_Server library');
         for (const [funcName, funcDef] of Object.entries(LIKE_A_SERVER_LIBRARY)) {
             scope.define(funcName, funcDef);
         }
-        console.log('[Interpreter] Loaded', Object.keys(LIKE_A_SERVER_LIBRARY).length, 'Like_a_Server functions');
+        // console.log('[Interpreter] Loaded', Object.keys(LIKE_A_SERVER_LIBRARY).length, 'Like_a_Server functions');
     }
 
     loadWeirdWideWeb(scope) {
-        console.log('[Interpreter] Loading Weird_Wide_Web library');
+        // console.log('[Interpreter] Loading Weird_Wide_Web library');
         for (const [funcName, funcDef] of Object.entries(WEIRD_WIDE_WEB_LIBRARY)) {
             scope.define(funcName, funcDef);
         }
-        console.log('[Interpreter] Loaded', Object.keys(WEIRD_WIDE_WEB_LIBRARY).length, 'Weird_Wide_Web functions');
+        // console.log('[Interpreter] Loaded', Object.keys(WEIRD_WIDE_WEB_LIBRARY).length, 'Weird_Wide_Web functions');
+    }
+
+    loadVirusAlert(scope) {
+        // console.log('[Interpreter] Loading Virus_Alert library');
+        for (const [funcName, funcDef] of Object.entries(VIRUS_ALERT_LIBRARY)) {
+            scope.define(funcName, funcDef);
+        }
+        // console.log('[Interpreter] Loaded', Object.keys(VIRUS_ALERT_LIBRARY).length, 'Virus_Alert functions');
     }
 
     async processImport(directive, scope) {
+        // console.log('[YankoviC Import] Processing import:', directive.value);
+        
         // --- THIS IS THE FIX ---
         // If library overrides are present, we are in a special execution context
         // (like the --electron CLI runner) where all necessary functions are already
         // injected. In this case, we should IGNORE standard library imports because
         // they have already been provided.
         if (Object.keys(this.libraryOverrides).length > 0) {
+            console.log('[YankoviC Import] Skipping import in special execution context (library overrides present)');
             return; 
         }
 
         // --- Original logic for IDE and non-electron CLI modes ---
         const match = directive.value.match(/#eat\s*(?:<(.+?)>|"(.+?)"|([a-zA-Z_][a-zA-Z0-9_]*\.hat))/);
-        if (!match) return;
+        if (!match) {
+            console.log('[YankoviC Import] No match found for directive');
+            return;
+        }
         let filePath = match[1] || match[2] || match[3];
+        // console.log('[YankoviC Import] Extracted filePath:', filePath);
 
-        if (filePath === 'UHF.hat') {
-            return this.loadUHF(scope);
-        }
-        if (filePath === 'albuquerque.hat') {
-            return this.loadMath(scope);
-        }
-        if (filePath === 'like_a_server.hat') {
-            return this.loadLikeAServer(scope);
-        }
-        if (filePath === 'weird_wide_web.hat') {
-            return this.loadWeirdWideWeb(scope);
+        // Normalize import name for built-in libraries
+        const normalized = filePath.toLowerCase().replace(/\.hat(\.js)?$/, '');
+        // console.log('[YankoviC Import] Normalized name:', normalized);
+        const builtins = {
+            'uhf': () => this.loadUHF(scope),
+            'albuquerque': () => this.loadMath(scope),
+            'like_a_server': () => this.loadLikeAServer(scope),
+            'weird_wide_web': () => this.loadWeirdWideWeb(scope),
+            'virus_alert': () => this.loadVirusAlert(scope)
+        };
+        // console.log('[YankoviC Import] Builtins available:', Object.keys(builtins));
+        if (builtins[normalized]) {
+            // console.log(`[YankoviC Import] Loading built-in library: ${normalized}`);
+            return builtins[normalized]();
+        } else {
+            // console.log(`[YankoviC Import] Built-in library not found for: ${normalized}, falling back to user file load.`);
         }
 
-        if (this.imports.has(filePath)) return;
+        // console.log('[YankoviC Import] Attempting to load user file:', filePath);
+        if (this.imports.has(filePath)) {
+            // console.log('[YankoviC Import] File already imported, skipping');
+            return;
+        }
         this.imports.set(filePath, true);
         
         try {
+            // console.log('[YankoviC Import] Getting file content for:', filePath);
             const content = await getFileContent(this.projectName, filePath);
+            // console.log('[YankoviC Import] File content received, length:', content.length);
+            // console.log('[YankoviC Import] First 100 chars of content:', content.slice(0, 100));
             const tokens = this.lexer(content);
             const oldState = { pos: this.pos, tokens: this.tokens };
             this.tokens = tokens;
@@ -696,6 +735,7 @@ export class YankoviCInterpreter {
             this.tokens = oldState.tokens;
             this.pos = oldState.pos;
         } catch (error) {
+            // console.log('[YankoviC Import] Import error:', error.message);
             throw new Error(`Import Error: Failed to import '${filePath}': ${error.message}`);
         }
     }

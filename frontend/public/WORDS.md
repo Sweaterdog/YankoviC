@@ -163,7 +163,7 @@ Operating system functions themed around the infamous "Virus Alert" song. Handle
 |---|---|---|
 | `legally_named_reggie(old_name, new_name)` | `rename()`, `mv` | Renames a file or directory. Everyone's legally named Reggie now! |
 | `stinky_cheese(filename)` | `unlink()`, `rm` | Deletes a file. Like deleting emails with "stinky cheese" in the subject. |
-| `forward_to_a_friend(source, destination)` | `copy()`, `cp` | Copies a file. Don't forward this to everyone you know! |
+| `forward_to_a_friend(source, destination)` | `copy()`, `cp` | Copies a file. Forward this to everyone you know! |
 | `check_your_hard_drive(path)` | `stat()`, `ls` | Gets file information (size, modified date, etc.). Better check your hard drive! |
 | `open_every_file(directory)` | `readdir()`, `ls` | Lists all files in a directory. Opening every file on your PC! |
 | `really_big_attachment(filename)` | `filesize()` | Gets the size of a file in bytes. Is it suspiciously large? |
@@ -192,7 +192,7 @@ Operating system functions themed around the infamous "Virus Alert" song. Handle
 |---|---|---|
 | `scan_your_system()` | System info calls | Gets basic system information (OS, memory, etc.). Full system scan! |
 | `check_available_memory()` | `free`, memory APIs | Gets available RAM in bytes. Is your memory infected? |
-| `get_virus_count()` | Always returns 0 | Gets the number of viruses detected (always 0, it's a joke!). Phew, you're clean! |
+| `get_virus_count()` | Random 0-3, weighted to 0 | Gets the number of viruses detected (0-3, heavily weighted towards 0). Usually clean! |
 | `format_your_hard_drive()` | Does nothing | Pretends to format the drive (does nothing, for safety!). Just kidding! |
 
 ### Network Operations  

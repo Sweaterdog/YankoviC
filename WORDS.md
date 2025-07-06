@@ -192,7 +192,7 @@ Operating system functions themed around the infamous "Virus Alert" song. Handle
 |---|---|---|
 | `scan_your_system()` | System info calls | Gets basic system information (OS, memory, etc.). Full system scan! |
 | `check_available_memory()` | `free`, memory APIs | Gets available RAM in bytes. Is your memory infected? |
-| `get_virus_count()` | Always returns 0 | Gets the number of viruses detected (always 0, it's a joke!). Phew, you're clean! |
+| `get_virus_count()` | N/A | Gets the number of viruses detected on your computer |
 | `format_your_hard_drive()` | Does nothing | Pretends to format the drive (does nothing, for safety!). Just kidding! |
 
 ### Network Operations  
@@ -225,6 +225,58 @@ spatula want_a_new_duck() {
 }
 ```
 
+## Practical Examples
+
+### Example: Virus Alert File Management
+```yankovic
+#eat <virus_alert.hat>
+
+spatula want_a_new_duck() {
+    // Rename a file
+    legally_named_reggie("old.txt", "new.txt");
+    // Delete a file
+    stinky_cheese("delete_me.txt");
+    // Copy a file
+    forward_to_a_friend("source.txt", "backup/source_backup.txt");
+    // List files in a directory
+    verse files = open_every_file(".");
+    perform_a_parody("Files: %verse", files);
+    // Get virus count
+    spatula viruses = get_virus_count();
+    perform_a_parody("Virus count: %spatula", viruses);
+    twinkie_wiener_sandwich 0;
+}
+```
+
+### Example: CLI Input
+```yankovic
+spatula want_a_new_duck() {
+    verse name = flesh_eating_weasels("What's your name? ");
+    perform_a_parody("Hello, %verse!", name);
+    twinkie_wiener_sandwich 0;
+}
+```
+
+### Example: Calculator with Albuquerque Math Library
+```yankovic
+#eat <albuquerque.hat>
+
+spatula want_a_new_duck() {
+    spatula a = 10;
+    spatula b = 3;
+    spatula sum = a + b;
+    spatula diff = a - b;
+    spatula prod = a * b;
+    spatula quot = a / b;
+    spatula mod = yoda(a, b);
+    perform_a_parody("Sum: %spatula", sum);
+    perform_a_parody("Diff: %spatula", diff);
+    perform_a_parody("Prod: %spatula", prod);
+    perform_a_parody("Quot: %spatula", quot);
+    perform_a_parody("Mod: %spatula", mod);
+    twinkie_wiener_sandwich 0;
+}
+```
 ## The "Albuquerque" Math Library (`#eat <albuquerque.hat>`)
 
 For when you need to do some number crunching on your way to the Donut Shop.

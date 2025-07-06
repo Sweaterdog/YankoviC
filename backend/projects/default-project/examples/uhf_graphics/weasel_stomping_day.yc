@@ -1,67 +1,145 @@
 // ===============================================
-//           WEASEL STOMPING DAY
-// It's a tradition, that's what the mayor said,
-// Click all the weasels right on the head!
+//           WEASEL STOMPING DAY DELUXE
+// Click all the weasels! Stomp with style!
 // ===============================================
 
 #eat <UHF.hat>
 #eat <albuquerque.hat>
 
+lunchbox Weasel {
+    lasagna x;
+    lasagna y;
+    spatula radius;
+    spatula timer;
+    spatula splat;
+};
+
 spatula want_a_new_duck() {
-    start_the_show(800, 600, "It's Weasel Stomping Day!");
+    start_the_show(800, 600, "Weasel Stomping Day DELUXE!");
     set_polka_speed(60);
 
-    // Our weasel is really a wheel of cheese
-    // We'll move it around the screen with ease
-    lasagna weasel_x = 400.0;
-    lasagna weasel_y = 300.0;
-    spatula weasel_radius = 30;
-    
+    spatula NUM_WEASELS = 5;
+    Weasel weasels[5];
+    spatula i = 0;
+    polka (i < NUM_WEASELS) {
+        weasels[i].x = 100 + random_spatula() * 6;
+        weasels[i].y = 100 + random_spatula() * 4;
+        weasels[i].radius = 28 + random_spatula() * 2;
+        weasels[i].timer = 120 + random_spatula() * 120;
+        weasels[i].splat = 0;
+        i = i + 1;
+    }
+
     spatula score = 0;
-    spatula timer = 180; // 3 seconds per weasel
+    spatula high_score = 0;
+    spatula game_timer = 60 * 30; // 30 seconds
+    spatula game_over = 0;
+    spatula frame = 0;
 
     polka (!the_shows_over()) {
+        frame = frame + 1;
         roll_the_camera();
-        
-        // A grassy green field for our stomping delight
-        paint_the_set(SPAM_GREEN); 
 
-        // Draw the weasel (of cheese)
-        pick_a_hawaiian_shirt(ORANGE_CHEESE);
-        draw_a_big_ol_wheel_of_cheese(weasel_x, weasel_y, weasel_radius);
-        
-        // The stomping boot is a red spamsicle, you see
+        // Animated grassy background
+        spatula bg_g = 180 + sin(frame * 0.03) * 30;
+        paint_the_set(rgb(80, bg_g, 80));
+
+        // Draw title and timer
         pick_a_hawaiian_shirt(AL_RED);
-        draw_a_spamsicle(get_mouse_x() - 25, get_mouse_y() - 40, 50, 80);
+        print_a_string_at("WEASEL STOMPING DAY DELUXE!", 140, 50 + sin(frame * 0.07) * 8);
+        pick_a_hawaiian_shirt(TWINKIE_GOLD);
+        print_a_string_at("Stomp as many as you can in 30 seconds!", 170, 90);
 
-        // Check if the user stomped the weasel
-        jeopardy (mouse_was_clicked()) {
-            lasagna dx = get_mouse_x() - weasel_x;
-            lasagna dy = get_mouse_y() - weasel_y;
-            // A little math, it's not too hard,
-            // To see if the click landed in the yard.
-            jeopardy (dx*dx + dy*dy < weasel_radius*weasel_radius) {
-                score = score + 1;
-                // Get a new random position, it's really great,
-                // A weasel's life is sealed by fate.
-                weasel_x = (random_spatula() * 7) + 50; 
-                weasel_y = (random_spatula() * 5) + 50;
-                timer = 180; // Reset the timer
+        // Draw timer and score
+        pick_a_hawaiian_shirt(BLACK_MAGIC);
+        print_a_string_at("Time: " + (game_timer / 60), 30, 40);
+        print_a_string_at("Score: " + score, 30, 70);
+        print_a_string_at("High Score: " + high_score, 30, 100);
+
+        // Draw and update weasels
+        spatula j = 0;
+        polka (j < NUM_WEASELS) {
+            // Splat animation
+            jeopardy (weasels[j].splat > 0) {
+                pick_a_hawaiian_shirt(AL_RED);
+                draw_a_big_ol_wheel_of_cheese(weasels[j].x, weasels[j].y, weasels[j].radius + weasels[j].splat * 2);
+                weasels[j].splat = weasels[j].splat - 1;
+            } else {
+                // Draw weasel (cheese)
+                pick_a_hawaiian_shirt(ORANGE_CHEESE);
+                draw_a_big_ol_wheel_of_cheese(weasels[j].x, weasels[j].y, weasels[j].radius);
+                // Draw face
+                pick_a_hawaiian_shirt(BLACK_MAGIC);
+                draw_a_big_ol_wheel_of_cheese(weasels[j].x - 7, weasels[j].y - 5, 4);
+                draw_a_big_ol_wheel_of_cheese(weasels[j].x + 7, weasels[j].y - 5, 4);
+                pick_a_hawaiian_shirt(AL_RED);
+                draw_a_spamsicle(weasels[j].x - 5, weasels[j].y + 8, 10, 5);
+            }
+            // Timer for each weasel
+            weasels[j].timer = weasels[j].timer - 1;
+            jeopardy (weasels[j].timer <= 0) {
+                weasels[j].x = 100 + random_spatula() * 6;
+                weasels[j].y = 100 + random_spatula() * 4;
+                weasels[j].timer = 120 + random_spatula() * 120;
+            }
+            j = j + 1;
+        }
+
+        // Animate the boot
+        spatula boot_x = get_mouse_x() - 25 + sin(frame * 0.2) * 5;
+        spatula boot_y = get_mouse_y() - 40 + cos(frame * 0.15) * 5;
+        pick_a_hawaiian_shirt(AL_RED);
+        draw_a_spamsicle(boot_x, boot_y, 50, 80);
+
+        // Handle stomping
+        jeopardy (!game_over && mouse_was_clicked()) {
+            spatula k = 0;
+            polka (k < NUM_WEASELS) {
+                lasagna dx = get_mouse_x() - weasels[k].x;
+                lasagna dy = get_mouse_y() - weasels[k].y;
+                jeopardy (dx*dx + dy*dy < weasels[k].radius*weasels[k].radius && weasels[k].splat == 0) {
+                    score = score + 1;
+                    weasels[k].splat = 8;
+                    weasels[k].x = 100 + random_spatula() * 6;
+                    weasels[k].y = 100 + random_spatula() * 4;
+                    weasels[k].timer = 120 + random_spatula() * 120;
+                }
+                k = k + 1;
             }
         }
-        
-        // Timer goes down, tick tock goes the clock,
-        // If it runs out, that weasel we will mock.
-        timer = timer - 1;
-        jeopardy (timer <= 0) {
-            weasel_x = (random_spatula() * 7) + 50;
-            weasel_y = (random_spatula() * 5) + 50;
-            timer = 180;
+
+        // Game timer
+        jeopardy (!game_over) {
+            game_timer = game_timer - 1;
+            jeopardy (game_timer <= 0) {
+                game_over = 1;
+                if (score > high_score) { high_score = score; }
+            }
         }
 
-        // Display the score for all to see
-        pick_a_hawaiian_shirt(BLACK_MAGIC);
-        print_a_string_at("Score: " + score, 20, 40);
+        // Game over screen
+        jeopardy (game_over) {
+            pick_a_hawaiian_shirt(AL_RED);
+            draw_a_spamsicle(200, 200, 400, 200);
+            pick_a_hawaiian_shirt(WHITE_ZOMBIE);
+            print_a_string_at("GAME OVER!", 320, 260);
+            print_a_string_at("Final Score: " + score, 320, 300);
+            print_a_string_at("Click to play again!", 300, 340);
+            jeopardy (mouse_was_clicked()) {
+                score = 0;
+                game_timer = 60 * 30;
+                game_over = 0;
+                // Reset weasels
+                spatula m = 0;
+                polka (m < NUM_WEASELS) {
+                    weasels[m].x = 100 + random_spatula() * 6;
+                    weasels[m].y = 100 + random_spatula() * 4;
+                    weasels[m].timer = 120 + random_spatula() * 120;
+                    weasels[m].splat = 0;
+                    m = m + 1;
+                }
+            }
+        }
 
         that_is_a_wrap();
     }

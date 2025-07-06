@@ -126,14 +126,20 @@ async function preprocessCode(filePath, processedFiles = new Set()) {
         });
     }
 
+    // List of built-in libraries to skip (case-insensitive, .hat or .hat.js)
+    const builtinLibs = [
+        'uhf.hat', 'albuquerque.hat', 'like_a_server.hat', 'weird_wide_web.hat', 'virus_alert.hat'
+    ];
+
     // Replace each #eat with the content of the imported file
     for (const imp of imports) {
-        // Skip standard libraries that are built-in to the interpreter
-        if (imp.path === 'UHF.hat' || imp.path === 'albuquerque.hat') {
+        // Normalize import name for built-ins
+        const impNorm = imp.path.toLowerCase().replace(/\.js$/, '');
+        if (builtinLibs.includes(impNorm)) {
             code = code.replace(imp.fullMatch, `// Pre-processed: ${imp.fullMatch} (built-in)`);
             continue;
         }
-        
+
         const importPath = path.resolve(path.dirname(absolutePath), imp.path);
         if (fs.existsSync(importPath)) {
             const importedCode = await preprocessCode(importPath, processedFiles);

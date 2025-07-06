@@ -453,6 +453,37 @@ export const LIKE_A_SERVER_LIBRARY = {
         }
     },
 
+    // === HTTP CLIENT (SERVER-SIDE FETCH) ===
+    amish_fetch: {
+        type: 'NativeFunction',
+        call: async (args) => {
+            const [url, method, body] = args;
+            try {
+                let httpModule = null;
+                if (typeof require !== 'undefined') {
+                    httpModule = require('http');
+                } else if (typeof global !== 'undefined' && global.nodeModules && global.nodeModules.http) {
+                    httpModule = global.nodeModules.http;
+                }
+                if (httpModule) {
+                    return new Promise((resolve, reject) => {
+                        const req = httpModule.request(url, { method: method || 'GET' }, (res) => {
+                            let data = '';
+                            res.on('data', chunk => data += chunk);
+                            res.on('end', () => resolve(data));
+                        });
+                        req.on('error', reject);
+                        if (method === 'POST' && body) req.write(body);
+                        req.end();
+                    });
+                } else {
+                    return '[Like_a_Server] No http module available in this environment';
+                }
+            } catch (e) {
+                return `[Like_a_Server] Fetch error: ${e.message}`;
+            }
+        }
+    },
     // === UTILITIES ===
     // Helper functions for your server
     // Make development much cleverer!

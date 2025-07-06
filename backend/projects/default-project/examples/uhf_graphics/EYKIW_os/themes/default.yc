@@ -1,0 +1,16 @@
+// ===============================================
+// EYKIW OS - Default Theme
+// ===============================================
+
+verse theme_name = "UHF Classic";
+spatula desktop_bg_r = 120;
+spatula desktop_bg_g = 180;
+spatula desktop_bg_b = 255;
+
+spatula window_border_color = SILVER_SPATULA;
+spatula window_titlebar_color = SKY_BLUE_FOR_YOU;
+spatula window_titlebar_text = BLACK_MAGIC;
+spatula window_bg = WHITE_ZOMBIE;
+spatula taskbar_bg = BLACK_MAGIC;
+spatula taskbar_text = WHITE_ZOMBIE;
+spatula accent_color = TWINKIE_GOLD;

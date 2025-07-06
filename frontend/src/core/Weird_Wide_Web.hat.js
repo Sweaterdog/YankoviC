@@ -29,6 +29,32 @@ function carveWoodenElement(tag, id, content) {
 }
 
 export const WEIRD_WIDE_WEB_LIBRARY = {
+    // === SEARCH ENGINES & KNOWLEDGE ===
+    // Search the web for text or images, or fetch Wikipedia articles!
+    amish_textbook: {
+        type: 'NativeFunction',
+        call: function(args) {
+            const [query] = args;
+            const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_redirect=1&no_html=1`;
+            return (typeof fetch !== 'undefined' ? fetch(url).then(r => r.json()).then(data => data.AbstractText || data.Answer || (data.RelatedTopics && data.RelatedTopics[0] && data.RelatedTopics[0].Text) || '[No answer found]').catch(e => `[amish_textbook] Error: ${e.message}`) : Promise.resolve('[amish_textbook] No fetch available'));
+        }
+    },
+    amish_photobook: {
+        type: 'NativeFunction',
+        call: function(args) {
+            const [query] = args;
+            const url = `https://duckduckgo.com/?q=${encodeURIComponent(query)}&iax=images&ia=images`;
+            return Promise.resolve(url);
+        }
+    },
+    amish_wikipedia: {
+        type: 'NativeFunction',
+        call: function(args) {
+            const [query] = args;
+            const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
+            return (typeof fetch !== 'undefined' ? fetch(url).then(r => r.json()).then(data => data.extract || '[No summary found]').catch(e => `[amish_wikipedia] Error: ${e.message}`) : Promise.resolve('[amish_wikipedia] No fetch available'));
+        }
+    },
     // === AMISH QUILT MANAGEMENT ===
     // Create your web quilt masterpiece
     // HTML structure sewn with care and peace!
@@ -317,6 +343,33 @@ export const WEIRD_WIDE_WEB_LIBRARY = {
         }
     },
 
+    // === HTTP FETCH (INTERNET ACCESS) ===
+    // Fetch real web pages, the Amish way!
+    amish_fetch: {
+        type: 'NativeFunction',
+        call: async (args) => {
+            const [url, method, body] = args;
+            try {
+                let response;
+                if (typeof fetch !== 'undefined') {
+                    response = await fetch(url, {
+                        method: method || 'GET',
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: method === 'POST' ? body : undefined
+                    });
+                    const text = await response.text();
+                    return text;
+                } else if (typeof window !== 'undefined' && window.webAPI && window.webAPI.fetch) {
+                    // Use custom webAPI if available
+                    return await window.webAPI.fetch(url, method, body);
+                } else {
+                    return '[Weird_Wide_Web] No fetch available in this environment';
+                }
+            } catch (e) {
+                return `[Weird_Wide_Web] Fetch error: ${e.message}`;
+            }
+        }
+    },
     // === QUILT ASSEMBLY ===
     // Put all the pieces together
     // Display your beautiful creation!
