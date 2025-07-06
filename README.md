@@ -4,9 +4,6 @@
 
 Welcome to **YankoviC**, the most ridiculously awesome programming language inspired by the legendary "Weird Al" Yankovic! YankoviC combines the power of structured programming with the whimsy of polka music and the humor of the world's greatest musical parodist.
 
-## 🎉 **RELEASE READY!** 
-
-YankoviC is now fully functional with working examples, web server capabilities, graphics programming, and a complete development environment! All major features have been implemented and tested.
 
 ### ✅ What's Working:
 - **Complete CLI and IDE** - Full development environment with AI assistant
@@ -77,6 +74,8 @@ Run the following command to install all dependencies, set up the environment, a
 ```bash
 ./install.sh
 ```
+
+This installer only works for Linux (Maybe MacOS idk), windows users will have to open it up and do it all manually
 
 ### Starting the Accordion IDE
 You can run the accordion anywhere!
