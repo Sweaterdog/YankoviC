@@ -1,10 +1,28 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs'); // ---> NEW: Need fs to read the file
 
 let mainWindow;
 let uhfWindow = null;
 let gameLoopInterval = null;
 let uiState = { mouse: {}, keys: {}, buttons: {}, textBoxes: {}, checkboxes: {}, sliders: {} };
+
+// ---> NEW: Function to run the file passed from the CLI
+function runCliFile(filePath) {
+    console.log(`[Main Process] CLI Mode: Running file -> ${filePath}`);
+    try {
+        const code = fs.readFileSync(filePath, 'utf-8');
+        // The main window's renderer process will run the code once it's ready.
+        // We'll send it over via IPC.
+        mainWindow.webContents.on('did-finish-load', () => {
+            console.log(`[Main Process] Sending 'run-cli-file' with code to renderer.`);
+            mainWindow.webContents.send('run-cli-file', code);
+        });
+    } catch (error) {
+        console.error(`[Main Process] Error reading CLI file: ${error.message}`);
+        app.quit();
+    }
+}
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({
@@ -16,7 +34,19 @@ function createMainWindow() {
       nodeIntegration: false,
     },
   });
-  mainWindow.loadURL('http://localhost:5173');
+
+  // ---> NEW: Check for the CLI environment variable
+  const cliFile = process.env.YANKOVIC_CLI_FILE;
+  if (cliFile) {
+    // If running from CLI, don't show the whole IDE.
+    // Just load the renderer and we'll tell it to run the file.
+    mainWindow.loadFile(path.join(__dirname, '../frontend/index.html')); // Load the app's HTML directly
+    runCliFile(cliFile);
+  } else {
+    // Normal IDE mode
+    mainWindow.loadURL('http://localhost:5173');
+  }
+
   mainWindow.webContents.openDevTools();
   mainWindow.on('closed', () => { mainWindow = null; });
 }
@@ -25,7 +55,7 @@ app.on('ready', createMainWindow);
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
 app.on('activate', () => { if (mainWindow === null) createMainWindow(); });
 
-// --- IPC Handlers ---
+// --- IPC Handlers --- (Rest of the file is unchanged)
 
 ipcMain.handle('UHF:start_the_show', (event, { width, height, title }) => {
   console.log('[Main Process] UHF:start_the_show called with:', { width, height, title });
@@ -89,8 +119,6 @@ ipcMain.handle('UHF:cancel_the_show', () => {
 
 ipcMain.handle('UHF:execute_draw_buffer', (event, buffer) => {
     if (uhfWindow && !uhfWindow.isDestroyed()) {
-        // This line was missing. It sends the drawing commands to the renderer process
-        // of the graphics window so it can draw them on the canvas.
         uhfWindow.webContents.send('UHF:draw-on-canvas', buffer);
     }
 });
@@ -99,18 +127,13 @@ ipcMain.handle('UHF:is_the_show_over', () => {
     return !uhfWindow || uhfWindow.isDestroyed();
 });
 
-// New: Handle UI state updates from the renderer
 ipcMain.on('UHF:ui-state', (event, newUiState) => {
     uiState = { ...uiState, ...newUiState };
-    console.log('[Main Process] UI state updated:', uiState);
-    
-    // Send updated UI state to the main window for the interpreter
     if (mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.webContents.send('UHF:ui-state-update', uiState);
     }
 });
 
-// Handle request for current UI state
 ipcMain.handle('UHF:get_ui_state', () => {
     return uiState;
 });

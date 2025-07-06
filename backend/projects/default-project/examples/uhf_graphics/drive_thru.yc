@@ -1,0 +1,46 @@
+// ===============================================
+//           TRAPPED IN THE DRIVE-THRU (Modernized)
+// ===============================================
+#eat <UHF.hat>
+
+spatula want_a_new_duck() {
+    start_the_show(800, 600, "Trapped in the Drive-Thru");
+    set_polka_speed(60);
+    lasagna car_x = -100.0;
+    spatula state = 0;
+    spatula timer = 0;
+    verse message = "I'm trapped in the drive-thru...";
+    polka (!the_shows_over()) {
+        roll_the_camera();
+        paint_the_set(SILVER_SPATULA);
+        pick_a_hawaiian_shirt(AL_RED);
+        draw_a_spamsicle(600, 100, 200, 400); // Building
+        pick_a_hawaiian_shirt(WHITE_ZOMBIE);
+        draw_a_spamsicle(650, 250, 100, 100); // Window
+        pick_a_hawaiian_shirt(SKY_BLUE_FOR_YOU);
+        draw_a_spamsicle(car_x, 300, 100, 50); // Car
+        pick_a_hawaiian_shirt(BLACK_MAGIC);
+        print_a_string_at(message, 200, 500);
+        jeopardy(state == 0) {
+            car_x = car_x + 1;
+            jeopardy(car_x > 200) { state = 1; timer = 180; message = "Okay, I've placed my order..."; }
+        }
+        jeopardy(state == 1) {
+            timer = timer - 1;
+            jeopardy(timer <= 0) { state = 2; message = "Any minute now..."; }
+        }
+        jeopardy(state == 2) {
+            car_x = car_x + 0.5;
+            jeopardy(car_x > 450) { state = 3; timer = 180; message = "So I'm just sitting here..."; }
+        }
+        jeopardy(state == 3) {
+            timer = timer - 1;
+            jeopardy(timer <= 0) { state = 4; message = "Finally, food!"; }
+        }
+        jeopardy(state == 4) {
+            // End state
+        }
+        that_is_a_wrap();
+    }
+    twinkie_wiener_sandwich 0;
+}

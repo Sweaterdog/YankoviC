@@ -1,0 +1,31 @@
+// ===============================================
+// WEIRD_WIDE_WEB SEARCH DEMO
+// Demonstrates amish_textbook, amish_photobook, and amish_wikipedia
+// ===============================================
+#eat <Weird_Wide_Web.hat>
+
+spatula want_a_new_duck() {
+    verse query = "puppies";
+
+    // 1. Text search (DuckDuckGo Instant Answer)
+    verse text_result = amish_textbook(query);
+    perform_a_parody("Textbook search for '" + query + "':");
+    perform_a_parody(text_result);
+
+    // 2. Wikipedia summary
+    verse wiki_result = amish_wikipedia(query);
+    perform_a_parody("Wikipedia summary for '" + query + "':");
+    perform_a_parody(wiki_result);
+
+    // 3. Image search (DuckDuckGo)
+    verse image_search_url = amish_photobook(query);
+    perform_a_parody("Image search URL for '" + query + "':");
+    perform_a_parody(image_search_url);
+
+    // (Optional) Download top 3 images from the search page
+    // This requires a helper in the interpreter or a future YankoviC function
+    // For now, just print the image search URL and instruct the user
+    perform_a_parody("To download the top 3 images, open the above URL in your browser and save them to a folder.");
+
+    twinkie_wiener_sandwich 27;
+}

@@ -1,23 +1,26 @@
-# 🎵 YankoviC Programming Language v1.0.0
+# 🎵 YankoviC Programming Language v1.1.0 
 
 *"Dare to be Stupid" - A Programming Language for the Accordion-Minded*
 
 Welcome to **YankoviC**, the most ridiculously awesome programming language inspired by the legendary "Weird Al" Yankovic! YankoviC combines the power of structured programming with the whimsy of polka music and the humor of the world's greatest musical parodist.
 
->  # Please note!
-> This is a very early version of YankoviC!
->
-> Do not expect all code to run perfectly, and expect the need to change some of the interpreters code!
-> 
-> I am doing my best to make this work, since Weird Al is my favorite, but It takes time to make a perfect project!
+
+### ✅ What's Working:
+- **Complete CLI and IDE** - Full development environment with AI assistant
+- **Graphics Programming** - UHF graphics library with animations and games  
+- **Web Development** - Like_a_Server library with real HTTP server functionality
+- **Math Library** - Comprehensive Albuquerque math functions
+- **File Management** - Project structure with examples and documentation
+- **Cross-Platform** - Works on Windows, macOS, and Linux
 
 ## 🎪 Table of Contents
 
-- [🎵 YankoviC Programming Language v1.0.0](#-yankovic-programming-language-v100)
+- [🎵 YankoviC Programming Language v1.1.0](#-yankovic-programming-language-v110)
   - [🎪 Table of Contents](#-table-of-contents)
   - [🚀 Quick Start](#-quick-start)
   - [🎯 Installation \& Setup](#-installation--setup)
     - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
     - [Starting the Accordion IDE](#starting-the-accordion-ide)
     - [CLI Usage](#cli-usage)
   - [🎼 Language Syntax](#-language-syntax)
@@ -54,7 +57,7 @@ Welcome to **YankoviC**, the most ridiculously awesome programming language insp
 ```yankovic
 // Your first YankoviC program
 spatula want_a_new_duck() {
-    perform_a_parody("Welcome to YankoviC! Dare to be stupid!\\n");
+    perform_a_parody("Welcome to YankoviC! Dare to be stupid!\n");
     twinkie_wiener_sandwich 27;
 }
 ```
@@ -65,28 +68,136 @@ spatula want_a_new_duck() {
 - Node.js 18+ 
 - npm or yarn
 
-### Starting the Accordion IDE
+### Installation
+Run the following command to install all dependencies, set up the environment, and add YankoviC to your PATH for global CLI use:
+
 ```bash
-# Start the backend server
-cd backend && npm start
-
-# Start the frontend IDE (in another terminal)
-cd frontend && npm run dev
-
-# Open your browser to http://localhost:5174
+./install.sh
 ```
 
-Or, if you use linux:
+This installer only works for Linux (Maybe MacOS idk), windows users will have to open it up and do it all manually
+
+### Starting the Accordion IDE
+You can run the accordion anywhere!
 ```bash
-# In the root directory
-./start.sh
+yankovic --accordion
 ```
 
 ### CLI Usage
+You can now run YankoviC programs globally using:
+
 ```bash
-# Run a YankoviC file directly
-node cli.js path/to/your/file.yc
+yankovic program.yc
 ```
+
+### Help
+If you need to figure out something with YankoviC, use the help command!
+```bash
+yankovic --help
+```
+
+### Demos
+The examples folder has plenty of examples, but if you want to see the full power of YankoviC, run this!
+```bash
+yankovic --demo
+```
+
+## 🆕 **Latest Features - v1.1.0 Release**
+
+### 🌐 **Web Development Ready!**
+YankoviC now includes a complete web development stack:
+
+```yankovic
+#eat like_a_server.hat
+
+spatula want_a_new_duck() {
+    // Start a real HTTP server
+    amish_barn_raising(3000);
+    
+    // Set up routes  
+    amish_buggy_trail_get("/", "welcome_page");
+    amish_barn_delivery_post("/api/data", "handle_data");
+    
+    // Keep server running
+    polka (its_a_fact) {
+        jeopardy (amish_barn_still_standing()) {
+            wait_for_a_moment(1000);
+        }
+    }
+    
+    twinkie_wiener_sandwich 27;
+}
+```
+
+**Real HTTP Server Features:**
+- ✅ GET, POST, PUT, DELETE routes
+- ✅ JSON and HTML responses  
+- ✅ CORS support
+- ✅ Middleware/helpers
+- ✅ Session management
+- ✅ Database operations
+
+### 🎨 **Enhanced Graphics Programming**
+```yankovic
+#eat UHF.hat
+
+spatula want_a_new_duck() {
+    start_the_show(800, 600, "My Game");
+    
+    polka (!the_shows_over()) {
+        roll_the_camera();
+        
+        // Draw animated graphics
+        pick_a_hawaiian_shirt(AL_RED);
+        draw_a_spamsicle(100, 100, 50, 50);
+        
+        // NEW: Display images and play media
+        fat_frame("al.jpeg", 200, 100, 400, 400);
+        Lossless_Laughter("background_music.mp3", "audio");
+        
+        that_is_a_wrap();
+    }
+    
+    twinkie_wiener_sandwich 27;
+}
+```
+
+### 🔧 **Improved CLI**
+- **Global Installation**: `yankovic program.yc` works anywhere
+- **Better Error Messages**: More helpful debugging information  
+- **Cross-Platform**: Works on Windows, macOS, and Linux
+- **Graphics Modes**: PNG export, Electron windows, ASCII art, headless
+
+### � **Organized Project Structure**
+```
+YankoviC/
+├── 📄 README.md              # Main documentation  
+├── 📄 WORDS.md               # Complete language reference
+├── 📄 UHF_CHANNELS.md        # Graphics mode documentation
+├── 🔧 install.sh             # Automated installer
+├── 🚀 yankovic               # Global CLI command
+├── 📁 backend/               # Backend server
+├── 📁 frontend/              # Web IDE interface  
+├── 📁 electron/              # Desktop app components
+└── 📁 examples/              # Working example programs
+    ├── like_a_server/        # ✅ Web server examples
+    ├── weird_wide_web/       # ✅ Client-side web development
+    ├── uhf_graphics/         # ✅ Graphics programming
+    ├── albuquerque_math/     # ✅ Mathematics examples
+    └── basic/                # ✅ Language fundamentals
+```
+
+### 🧪 **All Examples Tested & Working**
+- ✅ **Web Server**: Real HTTP server with routes and endpoints
+- ✅ **Graphics**: Animations, games, and interactive UIs
+- ✅ **Math**: Complex calculations and algorithms  
+- ✅ **Basic**: Core language features and syntax
+- ✅ **Web Development**: Client-side page generation
+- ✅ **Multimedia**: Image display and audio/video playback
+
+- **Improved CLI Output Handling**: The `cli_output` folder is now only created in PNG mode.
+- **Updated Web Server Example**: The `amish_web_server.ycw` example now uses a `polka` loop to keep the server running.
+- **Streamlined Installation**: The `install.sh` script now handles all setup steps, including adding YankoviC to the PATH.
 
 ## 🎼 Language Syntax
 
@@ -264,6 +375,7 @@ Import with: `#eat <albuquerque.hat>`
 spatula random_spatula();                    // Random number 0-99
 lasagna sin(lasagna angle);                  // Sine function
 lasagna cos(lasagna angle);                  // Cosine function
+spatula yoda(spatula a, spatula b);          // Modulus operation (remainder)
 // More functions coming in future versions!
 ```
 
@@ -442,3 +554,16 @@ spatula want_a_new_duck() {
     twinkie_wiener_sandwich 27;
 }
 ```
+
+
+### TODO List
+
+This is a list for things that I need to do, but feel free to open a PR with the feature!
+
+| Feature | Description | Why |
+| --- | --- | ---|
+| Reverse Interpeter | Converting Javascript, HTML, CSS, and Python files to YankoviC | Why not port everything to YankoviC? |
+| Try / Except | Add Try / Except with `do_i_creep_you_out` and catching with `creeped_out` | Everything has to work, so a lot of conditionals fail |
+| Sleep | Add a `stop_forwarding_that_crap` to waste time | You will need to have delays eventually |
+| Async | Add `saga_begins` to start an async, awaited with something | You need async and synchronous stuff |
+| More I am sure | I am tired, feel free to add whatever you want. | If it is Weird Al inspired I will probably merge. |

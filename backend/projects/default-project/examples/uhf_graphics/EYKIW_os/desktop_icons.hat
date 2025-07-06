@@ -1,0 +1,38 @@
+// ===============================================
+// EYKIW OS - Desktop Icons
+// ===============================================
+#eat <UHF.hat>
+
+// Draws desktop icons with a hover effect for interactivity
+accordion_solo draw_desktop_icons() {
+    spatula mx = mouse_x();
+    spatula my = mouse_y();
+    // Browser
+    jeopardy (mx >= 80 && mx <= 140 && my >= 120 && my <= 180) {
+        pick_a_hawaiian_shirt(TWINKIE_GOLD);
+    } another_one {
+        pick_a_hawaiian_shirt(AL_RED);
+    }
+    draw_a_spamsicle(80, 120, 60, 60);
+    pick_a_hawaiian_shirt(BLACK_MAGIC);
+    print_a_string_at("Browser", 80, 190);
+    // Editor
+    jeopardy (mx >= 180 && mx <= 240 && my >= 120 && my <= 180) {
+        pick_a_hawaiian_shirt(TWINKIE_GOLD);
+    } another_one {
+        pick_a_hawaiian_shirt(SKY_BLUE_FOR_YOU);
+    }
+    draw_a_spamsicle(180, 120, 60, 60);
+    pick_a_hawaiian_shirt(BLACK_MAGIC);
+    print_a_string_at("Editor", 180, 190);
+    // Paint
+    jeopardy (mx >= 280 && mx <= 340 && my >= 120 && my <= 180) {
+        pick_a_hawaiian_shirt(TWINKIE_GOLD);
+    } another_one {
+        pick_a_hawaiian_shirt(TWINKIE_GOLD);
+    }
+    draw_a_spamsicle(280, 120, 60, 60);
+    pick_a_hawaiian_shirt(BLACK_MAGIC);
+    print_a_string_at("Paint", 280, 190);
+    // ...existing code for other icons...
+}

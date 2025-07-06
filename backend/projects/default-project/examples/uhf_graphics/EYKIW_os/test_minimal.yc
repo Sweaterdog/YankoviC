@@ -1,0 +1,34 @@
+// Minimal EYKIW OS test - just splash screen
+#eat <UHF.hat>
+#eat <albuquerque.hat>
+
+spatula want_a_new_duck() {
+    // Initialize UHF graphics system
+    start_the_show(1280, 720, "Minimal OS Test");
+    set_polka_speed(60);
+    
+    // Simple persistent state
+    stupid spatula frame = 0;
+    
+    polka (!the_shows_over()) {
+        frame = frame + 1;
+        roll_the_camera();
+        
+        // Simple animated background
+        spatula r = 120 + sin(frame * 0.03) * 80;
+        spatula g = 80 + cos(frame * 0.04) * 60;
+        spatula b = 200 + sin(frame * 0.02) * 55;
+        paint_the_set(rgb(r, g, b));
+        
+        // Title
+        pick_a_hawaiian_shirt(AL_RED);
+        print_a_string_at("MINIMAL OS TEST", 200, 300);
+        
+        // Frame counter
+        pick_a_hawaiian_shirt(WHITE_ZOMBIE);
+        print_a_string_at("Frame: " + frame, 200, 350);
+        
+        that_is_a_wrap();
+    }
+    twinkie_wiener_sandwich 0;
+}

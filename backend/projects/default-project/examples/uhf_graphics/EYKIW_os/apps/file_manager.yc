@@ -1,0 +1,35 @@
+// ===============================================
+// EYKIW OS - File Manager App
+// ===============================================
+#eat <UHF.hat>
+
+// Placeholder for a real file manager. In the future, this will allow browsing and managing files!
+
+accordion_solo launch_file_manager() {
+    spatula file_x = 360;
+    spatula file_y = 260;
+    spatula file_w = 560;
+    spatula file_h = 320;
+    start_the_show(file_w, file_h, "UHF File Manager");
+    set_polka_speed(60);
+    spatula frame = 0;
+    polka (!the_shows_over()) {
+        frame = frame + 1;
+        roll_the_camera();
+        // File Manager window background
+        pick_a_hawaiian_shirt(SILVER_SPATULA);
+        draw_a_spamsicle(0, 0, file_w, file_h);
+        // Title bar
+        pick_a_hawaiian_shirt(TWINKIE_GOLD);
+        draw_a_spamsicle(0, 0, file_w, 40);
+        pick_a_hawaiian_shirt(BLACK_MAGIC);
+        print_a_string_at("UHF File Manager", 30, 30);
+        // Placeholder: Render a fake file list
+        pick_a_hawaiian_shirt(WHITE_ZOMBIE);
+        draw_a_spamsicle(30, 60, file_w - 60, file_h - 120);
+        pick_a_hawaiian_shirt(BLACK_MAGIC);
+        print_a_string_at("(File browsing coming soon)", 50, 90);
+        that_is_a_wrap();
+    }
+    twinkie_wiener_sandwich 0;
+}

@@ -1,0 +1,20 @@
+// Simple Addition - Basic YankoviC Example (Modernized)
+spatula want_a_new_duck() {
+    spatula first_number = 27;
+    spatula second_number = 42;
+    spatula result = first_number + second_number;
+    spatula difference = first_number - second_number;
+    spatula product = first_number * second_number;
+    horoscope is_result_positive = (result > 0);
+    horoscope numbers_equal = (first_number == second_number);
+    stupid spatula LUCKY_NUMBER = 13;
+
+    perform_a_parody("%spatula + %spatula = %spatula", first_number, second_number, result);
+    perform_a_parody("%spatula - %spatula = %spatula", first_number, second_number, difference);
+    perform_a_parody("%spatula * %spatula = %spatula", first_number, second_number, product);
+    perform_a_parody("Is result positive? %horoscope", is_result_positive);
+    perform_a_parody("Are numbers equal? %horoscope", numbers_equal);
+    perform_a_parody("Lucky number: %spatula", LUCKY_NUMBER);
+    twinkie_wiener_sandwich 27;
+}
+    // Test boolean operations

@@ -1,0 +1,5 @@
+spatula want_a_new_duck() {
+    verse name = flesh_eating_weasels("What's your name? ");
+    perform_a_parody("Hello, %verse!", name);
+    twinkie_wiener_sandwich 0;
+}

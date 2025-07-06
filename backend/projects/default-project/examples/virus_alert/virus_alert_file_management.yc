@@ -1,0 +1,12 @@
+#eat <virus_alert.hat>
+
+spatula want_a_new_duck() {
+    legally_named_reggie("old.txt", "new.txt");
+    stinky_cheese("delete_me.txt");
+    forward_to_a_friend("source.txt", "backup/source_backup.txt");
+    verse files = open_every_file(".");
+    perform_a_parody("Files: %verse", files);
+    spatula viruses = get_virus_count();
+    perform_a_parody("Virus count: %spatula", viruses);
+    twinkie_wiener_sandwich 0;
+}
