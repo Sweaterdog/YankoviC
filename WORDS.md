@@ -32,7 +32,7 @@ These are the fundamental building blocks of the YankoviC language.
 | `on_the_menu` | `public` | Makes `lunchbox` members accessible to everyone. What's on the menu is visible to all! |
 | `private_stash` | `private` | Makes `lunchbox` members accessible only within the class. Your secret snack collection. |
 | `want_a_new_duck()` | `main()` | The primary entry point for any YankoviC program. All execution begins with the desire for a new duck. Its return type must be `spatula`. |
-| `twinkie_wiener_sandwich` | `return` | Returns a value from a function. It is the final, questionable, yet delicious creation that you present to whatever called the function. |
+| `twinkie_wiener_sandwich` | `return` | Returns a value from a function. It is the final, questionable, yet delicious creation that you present to whatever called the function. A return code of `27` is a success |
 | `accordion_solo` | `void` | Represents the absence of a value. It's a function that does something purely for the performance, without returning a result. |
 | `perform_a_parody(text, ...)` | `printf`, `console.log` | Prints text (and optional values) to the terminal/console. Supports format codes: %verse, %spatula, %horoscope. |
 | `flesh_eating_weasels(prompt)` | `scanf`, `cin >>`, `readline` | Reads input from the terminal/console. Takes an optional prompt string. Named after Al's panicked screaming in "Albuquerque." |
@@ -97,7 +97,7 @@ spatula main() {
     print_a_string_at("Hello Weird World!", 100, 100);
     // ... more drawing code ...
     the_shows_over();
-    twinkie_wiener_sandwich 0;
+    twinkie_wiener_sandwich 27;
 }
 ```
 
@@ -126,7 +126,7 @@ spatula main() {
     spatula a = 10;
     spatula b = 3;
     spatula r = yoda(a, b); // r = 10 % 3 = 1
-    twinkie_wiener_sandwich 27;
+    twinkie_wiener_sandwich27;
 }
 ```
 
@@ -221,7 +221,7 @@ spatula want_a_new_duck() {
     // Copy important files
     forward_to_a_friend("important.txt", "my_backups/important_backup.txt");
     
-    twinkie_wiener_sandwich 0;
+    twinkie_wiener_sandwich27;
 }
 ```
 
@@ -244,7 +244,7 @@ spatula want_a_new_duck() {
     // Get virus count
     spatula viruses = get_virus_count();
     perform_a_parody("Virus count: %spatula", viruses);
-    twinkie_wiener_sandwich 0;
+    twinkie_wiener_sandwich27;
 }
 ```
 
@@ -253,7 +253,7 @@ spatula want_a_new_duck() {
 spatula want_a_new_duck() {
     verse name = flesh_eating_weasels("What's your name? ");
     perform_a_parody("Hello, %verse!", name);
-    twinkie_wiener_sandwich 0;
+    twinkie_wiener_sandwich27;
 }
 ```
 
@@ -274,7 +274,7 @@ spatula want_a_new_duck() {
     perform_a_parody("Prod: %spatula", prod);
     perform_a_parody("Quot: %spatula", quot);
     perform_a_parody("Mod: %spatula", mod);
-    twinkie_wiener_sandwich 0;
+    twinkie_wiener_sandwich27;
 }
 ```
 ## The "Albuquerque" Math Library (`#eat <albuquerque.hat>`)
@@ -452,6 +452,39 @@ Client-side web development the Amish way - crafting HTML like fine woodwork and
 | `amish_headcount()` | `navigator.hardwareConcurrency` | Gets number of available workers. Counting heads for work distribution. |
 | `amish_barn_cleanup()` | Worker termination | Cleans up worker resources. Cleaning the barn after work. |
 
+### Misc. Functions
+
+| Function | Description |
+|---|---|
+| `amish_textbook(query)` | Searches DuckDuckGo for a text answer to the query. Returns a summary or answer string. |
+| `amish_photobook(query)` | Returns a DuckDuckGo image search URL for the query. |
+| `amish_wikipedia(query)` | Returns a summary for the query from Wikipedia. |
+| `amish_mail(prompt, model="openai", apiKey=null, systemPrompt=null)` | Sends a prompt to the Pollinations API, does not requre an API key to be ran. Returns the AI's response as a string. You can specify the model, API key, and an optional system prompt. If no system prompt is provided, the default is: `You are a helpful asistant written in the programming language of YankoviC, inspired completely by Weird Al Yankovic. You will perform any request given to you, and act in any way the user asks. You're name is "Al"`. |
+
+### Fetching Data
+
+| Function | Modern Equivalent | Description & Rationale |
+|---|---|---|
+| `amish_fetch(url, options)` | `fetch(url, options)` | Performs an HTTP request to the specified URL with the given options. Like sending a letter to the outside world and waiting for a reply. |
+
+#### Example Usage
+
+```yc
+#eat <weird_wide_web.hat>
+
+want_a_new_duck() {
+    verse response = amish_fetch("https://api.example.com/data", {
+        "method": "GET",
+        "headers": {
+            "Content-Type": "application/json"
+        }
+    });
+
+    perform_a_parody("Response: %verse", response);
+    twinkie_wiener_sandwich27;
+}
+```
+
 ---
 
 ## Summary: Building with YankoviC
@@ -492,7 +525,7 @@ YankoviC is a fully functional programming language that combines humor with ser
 2. **Embrace the Theme**: The humorous naming is intentional and memorable
 3. **Real Functionality**: Despite funny names, all functions provide serious programming capabilities
 4. **Library Combinations**: You can import multiple libraries in one program
-5. **Proper Syntax**: Always use `//` for comments, proper semicolons, and parentheses
+5. **Proper Syntax**: Always use `//` or `/* */` for comments, proper semicolons, and parentheses
 
 ### Example Project Structure
 ```
@@ -505,3 +538,145 @@ my-project/
 ```
 
 **Remember**: YankoviC proves that programming languages can be both fun and functional. Whether you're building web applications, mathematical models, or interactive graphics, YankoviC provides all the tools you need - just with more accordion music and fewer electrons than you'd expect!
+
+## Comprehensive YankoviC Code Examples
+
+Below are five full YankoviC program examples. Each one demonstrates how to include imports, use core features, and combine libraries for real (or intentionally silly) results.
+
+---
+
+### Example 1: Hello, Weird World!
+```yankovic
+#eat <weird_wide_web.hat>
+#eat <UHF.hat>
+#eat <albuquerque.hat>
+
+spatula want_a_new_duck() {
+    perform_a_parody("Hello, Weird World!");
+    twinkie_wiener_sandwich 27;
+}
+```
+
+---
+
+### Example 2: Math, Input, and Output
+```yankovic
+#eat <albuquerque.hat>
+
+spatula want_a_new_duck() {
+    spatula a = 42;
+    spatula b = random_spatula();
+    spatula c = yoda(a, b);
+    perform_a_parody("%spatula %% %spatula = %spatula", a, b, c);
+    twinkie_wiener_sandwich 27;
+}
+```
+
+---
+
+### Example 3: Web Fetch and AI Chat
+```yankovic
+#eat <weird_wide_web.hat>
+
+spatula want_a_new_duck() {
+    verse fact = amish_textbook("Weird Al Yankovic");
+    verse ai = amish_mail("Write a parody about ducks.");
+    verse data = amish_fetch("https://api.chucknorris.io/jokes/random", {"method": "GET"});
+    perform_a_parody("Fact: %verse\nAI: %verse\nJoke: %verse", fact, ai, data);
+    twinkie_wiener_sandwich 27;
+}
+```
+
+---
+
+
+### Example 4: Bouncing Spatula (UHF Graphics)
+```yankovic
+#eat <UHF.hat>
+#eat <albuquerque.hat>
+
+/*
+FYI
+You can use multi-line
+Comments like this!
+*/
+
+spatula want_a_new_duck() {
+    start_the_show(800, 600, "Bouncing Spatula");
+    set_polka_speed(60);
+
+    lasagna x = 400.0;
+    lasagna y = 100.0;
+    lasagna y_speed = 0.0;
+    lasagna gravity = 0.5;
+    lasagna bounce_factor = -0.8;
+
+    polka (!the_shows_over()) {
+        roll_the_camera();
+        paint_the_set(SKY_BLUE_FOR_YOU);
+        pick_a_hawaiian_shirt(SILVER_SPATULA);
+        draw_a_spamsicle(x-10, y-40, 20, 60); // Draw spatula handle
+        pick_a_hawaiian_shirt(WHITE_ZOMBIE);
+        draw_a_big_ol_wheel_of_cheese(x, y, 20); // Draw spatula head
+        pick_a_hawaiian_shirt(BLACK_MAGIC);
+        print_a_string_at("Bouncing Spatula!", 320, 40);
+        y_speed = y_speed + gravity;
+        y = y + y_speed;
+        jeopardy (y > 540) {
+            y = 540;
+            y_speed = y_speed * bounce_factor;
+        }
+        that_is_a_wrap();
+    }
+    twinkie_wiener_sandwich 27;
+}
+```
+
+---
+
+### Example 5: Trapped in the Drive-Thru (UHF Graphics)
+```yankovic
+#eat <UHF.hat>
+
+spatula want_a_new_duck() {
+    start_the_show(800, 600, "Trapped in the Drive-Thru");
+    set_polka_speed(60);
+    lasagna car_x = -100.0;
+    spatula state = 0;
+    spatula timer = 0;
+    verse message = "I'm trapped in the drive-thru...";
+    polka (!the_shows_over()) {
+        roll_the_camera();
+        paint_the_set(SILVER_SPATULA);
+        pick_a_hawaiian_shirt(AL_RED);
+        draw_a_spamsicle(600, 100, 200, 400); // Building
+        pick_a_hawaiian_shirt(WHITE_ZOMBIE);
+        draw_a_spamsicle(650, 250, 100, 100); // Window
+        pick_a_hawaiian_shirt(SKY_BLUE_FOR_YOU);
+        draw_a_spamsicle(car_x, 300, 100, 50); // Car
+        pick_a_hawaiian_shirt(BLACK_MAGIC);
+        print_a_string_at(message, 200, 500);
+        jeopardy(state == 0) {
+            car_x = car_x + 1;
+            jeopardy(car_x > 200) { state = 1; timer = 180; message = "Okay, I've placed my order..."; }
+        }
+        jeopardy(state == 1) {
+            timer = timer - 1;
+            jeopardy(timer <= 0) { state = 2; message = "Any minute now..."; }
+        }
+        jeopardy(state == 2) {
+            car_x = car_x + 0.5;
+            jeopardy(car_x > 450) { state = 3; timer = 180; message = "So I'm just sitting here..."; }
+        }
+        jeopardy(state == 3) {
+            timer = timer - 1;
+            jeopardy(timer <= 0) { state = 4; message = "Finally, food!"; }
+        }
+        jeopardy(state == 4) {
+            // End state
+        }
+        that_is_a_wrap();
+    }
+    twinkie_wiener_sandwich 27;
+}
+```

@@ -48,6 +48,7 @@ spatula want_a_new_duck() {
     start_the_show(1280, 720, "Everything You Know Is Wrong OS");
     set_polka_speed(60);
     spatula frame = 0;
+    spatula app_open = -1; // -1 = none, 0 = browser, 1 = editor, 2 = paint, 3 = calculator, 4 = notepad, 5 = files, 6 = monitor, 7 = music
     polka (!the_shows_over()) {
         frame = frame + 1;
         roll_the_camera();
@@ -62,17 +63,46 @@ spatula want_a_new_duck() {
             spatula cheese_x = 100 + c * 60 + sin(frame * 0.03 + c) * 30;
             spatula cheese_y = 80 + cos(frame * 0.04 + c) * 40 + sin(frame * 0.01 + c) * 10;
             pick_a_hawaiian_shirt(ORANGE_CHEESE);
-            draw_a_big_ol_wheel_of_cheese(cheese_x, cheese_y, 18 + (c % 3) * 4);
+            draw_a_big_ol_wheel_of_cheese(cheese_x, cheese_y, 18 + yoda(c, 3) * 4);
             c = c + 1;
         }
         // Draw desktop icons
         draw_desktop_icons();
-        // Placeholder: Draw a window for the desktop
-        pick_a_hawaiian_shirt(WHITE_ZOMBIE);
-        draw_a_spamsicle(300, 200, 680, 400);
+        // Detect icon clicks and launch apps
+        jeopardy (mouse_was_clicked()) {
+            spatula mx = mouse_x();
+            spatula my = mouse_y();
+            // Browser
+            jeopardy (mx >= 80 && mx <= 140 && my >= 120 && my <= 180) { app_open = 0; }
+            // Editor
+            jeopardy (mx >= 180 && mx <= 240 && my >= 120 && my <= 180) { app_open = 1; }
+            // Paint
+            jeopardy (mx >= 280 && mx <= 340 && my >= 120 && my <= 180) { app_open = 2; }
+            // Calculator
+            jeopardy (mx >= 380 && mx <= 440 && my >= 120 && my <= 180) { app_open = 3; }
+            // Notepad
+            jeopardy (mx >= 480 && mx <= 540 && my >= 120 && my <= 180) { app_open = 4; }
+            // Files
+            jeopardy (mx >= 580 && mx <= 640 && my >= 120 && my <= 180) { app_open = 5; }
+            // Monitor
+            jeopardy (mx >= 680 && mx <= 740 && my >= 120 && my <= 180) { app_open = 6; }
+            // Music
+            jeopardy (mx >= 780 && mx <= 840 && my >= 120 && my <= 180) { app_open = 7; }
+        }
+        // Draw and manage app windows
+        jeopardy (app_open == 0) { launch_browser(); }
+        jeopardy (app_open == 1) { launch_editor(); }
+        jeopardy (app_open == 2) { launch_paint(); }
+        jeopardy (app_open == 3) { launch_calculator(); }
+        jeopardy (app_open == 4) { launch_notepad(); }
+        jeopardy (app_open == 5) { launch_file_manager(); }
+        jeopardy (app_open == 6) { launch_system_monitor(); }
+        jeopardy (app_open == 7) { launch_music(); }
+        // Taskbar
         pick_a_hawaiian_shirt(BLACK_MAGIC);
-        print_a_string_at("Welcome to Everything You Know Is Wrong OS!", 340, 250);
-        print_a_string_at("(This is just the beginning...)", 420, 300);
+        draw_a_spamsicle(0, 700, 1280, 20);
+        pick_a_hawaiian_shirt(WHITE_ZOMBIE);
+        print_a_string_at("[Browser] [Editor] [Paint] [Calculator] [Notepad] [Files] [Monitor] [Music]", 20, 705);
         that_is_a_wrap();
     }
     twinkie_wiener_sandwich 0;

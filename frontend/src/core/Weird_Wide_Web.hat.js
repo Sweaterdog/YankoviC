@@ -499,6 +499,37 @@ export const WEIRD_WIDE_WEB_LIBRARY = {
             }
         }
     },
+
+    // === AI CHAT & GENERIC API CALL (amish_mail) ===
+    // Send a prompt to a GenAI/text API (e.g., Pollinations, OpenAI, etc.)
+    // Usage: amish_mail(prompt, model="openai", apiKey=null)
+    amish_mail: {
+        type: 'NativeFunction',
+        call: async (args) => {
+            const prompt = args[0] || '';
+            const model = args[1] || 'openai';
+            const apiKey = args[2] || null;
+            const systemPrompt = args[3] || 'You are a helpful asistant written in the programming language of YankoviC, inspired completely by Weird Al Yankovic. You will perform any request given to you, and act in any way the user asks. You\'re name is "Al"';
+            // Build the URL for Pollinations text API
+            let url = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${encodeURIComponent(model)}`;
+            let headers = { 'Content-Type': 'text/plain' };
+            if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
+            // Add system prompt as a header if provided (API must support this)
+            if (systemPrompt) headers['X-System-Prompt'] = systemPrompt;
+            try {
+                if (typeof fetch !== 'undefined') {
+                    const response = await fetch(url, { method: 'GET', headers });
+                    return await response.text();
+                } else if (typeof window !== 'undefined' && window.webAPI && window.webAPI.fetch) {
+                    return await window.webAPI.fetch(url, 'GET', null, headers);
+                } else {
+                    return '[amish_mail] No fetch available in this environment';
+                }
+            } catch (e) {
+                return `[amish_mail] Error: ${e.message}`;
+            }
+        }
+    },
 };
 
 // Helper function to generate HTML for the complete quilt

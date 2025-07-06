@@ -78,7 +78,7 @@ spatula want_a_new_duck() {
         spatula j = 0;
         polka (j < 5) {
             draw_the_duck(ducks[j], rotation_angle);
-            j = j + 1;
+            j = j + 1
         }
 
         // Animated title text
