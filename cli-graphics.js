@@ -47,7 +47,7 @@ export class CLIGraphicsRenderer {
           }
         }
         
-        console.log(`[UHF] Tuned to Channel ${this.getChannelNumber()} - ${this.getChannelName()}`);
+        // UHF Channel tuned - graphics system ready
     }
     
     getChannelNumber() {

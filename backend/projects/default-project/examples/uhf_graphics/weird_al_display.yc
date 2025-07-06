@@ -1,0 +1,42 @@
+// Weird Al Image Display Demo
+// This program demonstrates the new fat_frame function for displaying images
+// Shows a picture of the legendary Weird Al himself!
+
+#eat <UHF.hat>
+
+spatula want_a_new_duck() {
+    // Start the show with a window sized for the image
+    start_the_show(800, 600, "Weird Al - The Legend Himself!");
+    set_polka_speed(30); // 30 FPS for smooth display
+    
+    spatula frame_count = 0;
+    
+    // Main display loop
+    polka (!the_shows_over()) {
+        roll_the_camera();
+        
+        // Paint a nice background
+        paint_the_set(BLACK_MAGIC);
+        
+        // Display the Weird Al image in the center
+        fat_frame("/home/sweaterdog/Desktop/Coding_projects/YankoviC/backend/projects/default-project/examples/uhf_graphics/al.jpeg", 200, 100, 400, 400);
+        
+        // Add some animated text below the image
+        pick_a_hawaiian_shirt(TWINKIE_GOLD);
+        spatula text_y = 520 + (sin(frame_count * 0.1) * 10);
+        print_a_string_at("🎵 Weird Al Yankovic - The Master of Parody! 🎵", 150, text_y);
+        
+        // Add some decorative elements
+        pick_a_hawaiian_shirt(AL_RED);
+        spatula star_x = 100 + (cos(frame_count * 0.05) * 30);
+        draw_a_big_ol_wheel_of_cheese(star_x, 50, 15);
+        
+        spatula star_x2 = 700 + (cos(frame_count * 0.08) * 30);
+        draw_a_big_ol_wheel_of_cheese(star_x2, 50, 15);
+        
+        frame_count = frame_count + 1;
+        that_is_a_wrap();
+    }
+    
+    twinkie_wiener_sandwich 27;
+}

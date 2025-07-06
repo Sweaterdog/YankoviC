@@ -1,13 +1,11 @@
 // YANKOVIC - The "Dare to be Stupid" Interpreter
-// This is the definitive version with a completely rewritten statement parser
-// that correctly handles all forms of declarations and expressions.
 import { getFileContent } from './fileApiService.js';
 import { UHF_LIBRARY, flushDrawCommands } from './UHF.hat.js';
 import { LIKE_A_SERVER_LIBRARY } from './Like_a_Server.hat.js';
 import { WEIRD_WIDE_WEB_LIBRARY } from './Weird_Wide_Web.hat.js';
 
 console.log('=== YANKOVIC INTERPRETER LOADED v2024-07-05-YODA-RENAME-v3 ===');
-console.log('UHF_LIBRARY keys:', Object.keys(UHF_LIBRARY));
+// console.log('UHF_LIBRARY keys:', Object.keys(UHF_LIBRARY));
 
 class Scope {
     constructor(parent = null) {

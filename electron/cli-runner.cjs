@@ -54,7 +54,7 @@ function startLocalServer() {
         
         server.listen(0, 'localhost', () => {
             serverPort = server.address().port;
-            console.log(`[CLI-RUNNER] Local server started on http://localhost:${serverPort}`);
+            // console.log(`[CLI-RUNNER] Local server started on http://localhost:${serverPort}`);
             resolve(serverPort);
         });
         
@@ -79,7 +79,7 @@ function createWindow() {
 
     // Prevent window from closing immediately
     mainWindow.on('close', (event) => {
-        console.log('[CLI-RUNNER] Window attempting to close');
+        // console.log('[CLI-RUNNER] Window attempting to close');
         // Uncomment the next line to prevent closing for debugging
         // event.preventDefault();
     });
@@ -95,10 +95,10 @@ function createWindow() {
             // The renderer URL is now served via HTTP
             const rendererURL = `http://localhost:${serverPort}/assets/cli-renderer.js`;
             
-            console.log('[CLI-RUNNER] Sending code and renderer URL:', {
-                codeLength: code ? code.length : 0,
-                rendererURL
-            });
+            // console.log('[CLI-RUNNER] Sending code and renderer URL:', {
+            //     codeLength: code ? code.length : 0,
+            //     rendererURL
+            // });
             
             if (code) {
                 // Send both the code to run and the HTTP URL to the script
@@ -123,22 +123,21 @@ function createWindow() {
 // --- UHF IPC Handlers (copied from main.cjs) ---
 
 ipcMain.handle('UHF:start_the_show', (event, { width, height, title }) => {
-  console.log('[CLI Runner] UHF:start_the_show called with:', { width, height, title });
+  //  console.log('[CLI Runner] UHF:start_the_show called with:', { width, height, title });
   if (uhfWindow) { 
-    console.log('[CLI Runner] Closing existing UHF window');
+    // console.log('[CLI Runner] Closing existing UHF window');
     uhfWindow.close(); 
   }
   
-  console.log('[CLI Runner] Creating new UHF window');
   uhfWindow = new BrowserWindow({
     width, height, title,
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false
+      contextIsolation: false,
+      webSecurity: false // DANGEROUS: Allows loading local files. ONLY FOR LOCAL DEV TOOL.
     }
   });
 
-  console.log('[CLI Runner] Loading UHF window HTML');
   uhfWindow.loadFile(path.join(__dirname, 'uhfWindow.html'));
   
   uhfWindow.on('closed', () => { uhfWindow = null; });

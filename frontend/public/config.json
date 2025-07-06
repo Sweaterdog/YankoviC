@@ -1,7 +1,6 @@
 {
   "apiKeys": {
-    "pollinations": "gsVU91PD7-aQ_W6k",
-    "gemini": "YOUR_GEMINI_API_KEY"
+    "pollinations": "gsVU91PD7-aQ_W6k"
   },
   "activeAIService": "pollinations",
   "aiModels": [

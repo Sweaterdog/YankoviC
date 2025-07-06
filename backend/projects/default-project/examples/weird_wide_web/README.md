@@ -9,7 +9,7 @@ A complete HTML page generation example demonstrating DOM creation, styling, and
 
 **How to run:**
 ```bash
-./yankovic simple_amish_quilt.ycw
+yankovic program.yc
 ```
 
 **What it does:**

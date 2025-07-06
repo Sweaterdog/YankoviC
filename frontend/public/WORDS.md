@@ -163,7 +163,7 @@ Operating system functions themed around the infamous "Virus Alert" song. Handle
 |---|---|---|
 | `legally_named_reggie(old_name, new_name)` | `rename()`, `mv` | Renames a file or directory. Everyone's legally named Reggie now! |
 | `stinky_cheese(filename)` | `unlink()`, `rm` | Deletes a file. Like deleting emails with "stinky cheese" in the subject. |
-| `forward_to_a_friend(source, destination)` | `copy()`, `cp` | Copies a file. Forward this to everyone you know! |
+| `forward_to_a_friend(source, destination)` | `copy()`, `cp` | Copies a file. Don't forward this to everyone you know! |
 | `check_your_hard_drive(path)` | `stat()`, `ls` | Gets file information (size, modified date, etc.). Better check your hard drive! |
 | `open_every_file(directory)` | `readdir()`, `ls` | Lists all files in a directory. Opening every file on your PC! |
 | `really_big_attachment(filename)` | `filesize()` | Gets the size of a file in bytes. Is it suspiciously large? |

@@ -9,7 +9,7 @@ Welcome to the most ridiculously over-engineered, thematically-consistent, and f
 - **The Al-gorithms of Style Linter**: Catches your errors and mocks you for them with style.
 - **The Lyric Prompter**: An autocomplete that suggests thematically appropriate variable and function names.
 - **The White & Nerdy Debugger**: An animated "Weird Al" head that judges your code's execution.
-- **Dual AI Assistant ("Al")**: Powered by either Google's Gemini SDK or the Pollinations.AI gateway, configurable to your needs.
+- **Dual AI Assistant ("Al")**: Powered by Pollinations.AI gateway for code completion and help.
 - **File Management**: Create and switch between files in your workspace.
 
 ## Setup & Installation
@@ -22,9 +22,8 @@ Welcome to the most ridiculously over-engineered, thematically-consistent, and f
     ```
 4.  **Configure API Keys:**
     *   Open the `public/config.json` file.
-    *   Add your API key for Gemini to the `apiKeyGemini` field.
-    *   If you want to use Pollinations, add your key to `apiKeyPollinations`.
-    *   Set `activeAIService` to either `"gemini"` or `"pollinations"` to choose which AI service to use.
+    *   Add your API key for Pollinations to the `apiKeyPollinations` field (or leave blank for anonymous access).
+    *   The `activeAIService` is set to `"pollinations"` by default.
 
 ## Running The Accordion
 

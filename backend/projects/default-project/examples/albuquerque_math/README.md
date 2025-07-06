@@ -9,7 +9,7 @@ A simple demonstration of trigonometric functions (`sin`, `cos`), random number 
 
 **How to run:**
 ```bash
-./yankovic math_demo.yc
+yankovic program.yc
 ```
 
 **What it does:**

@@ -7,6 +7,8 @@ class CanvasRenderer {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.currentColor = '#FFFFFF';
+        this.loadedImages = new Map(); // Store loaded images
+        this.imagesToDraw = []; // Queue of images to draw each frame
         this.uiState = {
             mouse: { x: 0, y: 0, clicked: false, isDown: false },
             buttons: {}
@@ -53,6 +55,50 @@ class CanvasRenderer {
         };
 
         return {
+            ...colors, // Spread the colors into the library
+            fat_frame: (args) => {
+                console.log('[CLI-MAIN] fat_frame called with:', args);
+                const [imageUrl, x, y, width, height] = args;
+                
+                // If image is already loaded, draw it immediately
+                if (this.loadedImages.has(imageUrl)) {
+                    const img = this.loadedImages.get(imageUrl);
+                    this.ctx.drawImage(img, x || 0, y || 0, width || img.width, height || img.height);
+                    console.log('[CLI-MAIN] Drew cached image');
+                    return;
+                }
+                
+                // Load the image and cache it
+                const img = new window.Image();
+                img.onload = () => {
+                    console.log('[CLI-MAIN] Image loaded successfully');
+                    this.loadedImages.set(imageUrl, img);
+                    this.ctx.drawImage(img, x || 0, y || 0, width || img.width, height || img.height);
+                    console.log('[CLI-MAIN] Drew new image');
+                };
+                img.onerror = (error) => {
+                    console.error('[CLI-MAIN] Image failed to load:', error);
+                };
+                
+                // Set the source
+                img.src = imageUrl;
+                console.log('[CLI-MAIN] Loading image from:', imageUrl.substring(0, 50) + '...');
+            },
+            Lossless_Laughter: (args) => {
+                const [mediaUrl, type] = args;
+                let mediaElem = document.getElementById('uhf-media');
+                if (mediaElem) mediaElem.remove();
+                mediaElem = document.createElement(type === 'video' ? 'video' : 'audio');
+                mediaElem.id = 'uhf-media';
+                mediaElem.src = mediaUrl.startsWith('/') ? `file://${mediaUrl}` : mediaUrl;
+                mediaElem.autoplay = true;
+                mediaElem.controls = true; // Show controls for now
+                mediaElem.style.position = 'absolute';
+                mediaElem.style.top = '10px';
+                mediaElem.style.left = '10px';
+                mediaElem.style.zIndex = '1000';
+                document.body.appendChild(mediaElem);
+            },
             start_the_show: (args) => {
                 console.log('[CLI-MAIN] start_the_show called with:', args);
                 this.canvas.width = args[0]; this.canvas.height = args[1];
@@ -170,8 +216,6 @@ class CanvasRenderer {
             cos: (args) => Math.cos(args[0]),
             random_spatula: () => Math.floor(Math.random() * 100),
             yoda: (args) => args[0] % args[1],
-            // Color constants - spread them into the main object
-            ...colors
         };
     }
 }

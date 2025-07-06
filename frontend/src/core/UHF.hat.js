@@ -146,6 +146,23 @@ export const UHF_LIBRARY = {
     },
 
     // === UI Elements ===
+    // === MEDIA & IMAGE PLAYBACK ===
+    // Lossless_Laughter: Play audio or video files (URL or local path)
+    Lossless_Laughter: {
+        type: 'NativeFunction',
+        call: (args) => {
+            // args: [mediaUrl, type ('audio'|'video')]
+            drawCommandBuffer.push({command: 'play_media', args: [args[0], args[1] || 'audio']});
+        }
+    },
+    // fat_frame: Display an image file (URL or local path)
+    fat_frame: {
+        type: 'NativeFunction',
+        call: (args) => {
+            // args: [imageUrl, x, y, width, height]
+            drawCommandBuffer.push({command: 'show_image', args: args});
+        }
+    },
     draw_a_button: { 
         type: 'NativeFunction', 
         call: (args) => { 

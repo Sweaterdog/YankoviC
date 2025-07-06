@@ -9,7 +9,7 @@ A basic arithmetic program demonstrating variable declaration, operations, and t
 
 **How to run:**
 ```bash
-./yankovic simple_addition.yc
+yankovic program.yc
 ```
 
 **What it does:**

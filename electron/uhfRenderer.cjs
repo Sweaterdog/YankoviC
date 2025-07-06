@@ -50,6 +50,35 @@ ipcRenderer.on('UHF:draw-on-canvas', (event, buffer) => {
     for (const cmd of buffer) {
         
         switch (cmd.command) {
+            case 'play_media': {
+                // args: [mediaUrl, type ('audio'|'video')]
+                const [mediaUrl, type] = cmd.args;
+                let mediaElem = document.getElementById('uhf-media');
+                if (mediaElem) mediaElem.remove();
+                mediaElem = document.createElement(type === 'video' ? 'video' : 'audio');
+                mediaElem.id = 'uhf-media';
+                mediaElem.src = mediaUrl;
+                mediaElem.autoplay = true;
+                mediaElem.controls = true;
+                mediaElem.style.position = 'absolute';
+                mediaElem.style.left = '0';
+                mediaElem.style.top = '0';
+                mediaElem.style.maxWidth = '100%';
+                mediaElem.style.maxHeight = '100%';
+                mediaElem.style.zIndex = 1000;
+                document.body.appendChild(mediaElem);
+                break;
+            }
+            case 'show_image': {
+                // args: [imageUrl, x, y, width, height]
+                const [imageUrl, x, y, width, height] = cmd.args;
+                const img = new window.Image();
+                img.onload = function() {
+                    ctx.drawImage(img, x || 0, y || 0, width || img.width, height || img.height);
+                };
+                img.src = imageUrl;
+                break;
+            }
             case 'clear_screen':
                 const [bgColor] = cmd.args; // Unbox the argument from its array
                 ctx.fillStyle = bgColor || 'black';

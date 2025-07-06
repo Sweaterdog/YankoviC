@@ -2,6 +2,16 @@
 // "I've been spending most my life, living in an Amish paradise"
 // Ironically building web servers the Amish way - no electricity, but somehow it works!
 
+// Import Node.js HTTP module for actual server functionality
+let http = null;
+try {
+    if (typeof require !== 'undefined') {
+        http = require('http');
+    }
+} catch (e) {
+    console.log('[Like_a_Server] Running in browser mode - server functionality limited');
+}
+
 function getAmishServerAPI() {
     return (typeof window !== 'undefined' && window.serverAPI) ? window.serverAPI : null;
 }
@@ -13,7 +23,8 @@ let amishServerState = {
     buggyRoutes: new Map(),
     communityHelpers: [],
     familySessions: new Map(),
-    grainStorages: new Map()
+    grainStorages: new Map(),
+    actualServer: null // Store the actual HTTP server
 };
 
 function raiseTheBarn() {
@@ -21,10 +32,92 @@ function raiseTheBarn() {
     if (api) {
         return api.startServer(amishServerState.churchBellPort);
     } else {
-        // Mock implementation for CLI/testing - Amish style
-        amishServerState.barnIsRaised = true;
-        console.log(`[Like_a_Server] Amish barn raised on port ${amishServerState.churchBellPort} with community help!`);
-        return 27; // Success, blessed by the elders!
+        // Try to import Node.js http module for real server
+        let http = null;
+        console.log(`[Like_a_Server] DEBUG: typeof require = ${typeof require}`);
+        console.log(`[Like_a_Server] DEBUG: typeof global = ${typeof global}`);
+        console.log(`[Like_a_Server] DEBUG: typeof global.nodeModules = ${typeof global !== 'undefined' && global.nodeModules ? typeof global.nodeModules : 'undefined'}`);
+        
+        try {
+            // Check if we're in Node.js environment and try different ways to get http module
+            if (typeof global !== 'undefined' && global && global.nodeModules && global.nodeModules.http) {
+                console.log(`[Like_a_Server] DEBUG: Using http module from global.nodeModules`);
+                http = global.nodeModules.http;
+                console.log(`[Like_a_Server] DEBUG: http module loaded successfully from global.nodeModules`);
+            } else if (typeof require !== 'undefined') {
+                console.log(`[Like_a_Server] DEBUG: require function available, attempting to load http module`);
+                http = require('http');
+                console.log(`[Like_a_Server] DEBUG: http module loaded successfully via require`);
+            } else if (typeof global !== 'undefined' && global && global.require) {
+                console.log(`[Like_a_Server] DEBUG: trying global.require`);
+                http = global.require('http');
+                console.log(`[Like_a_Server] DEBUG: http module loaded successfully via global.require`);
+            } else {
+                console.log(`[Like_a_Server] DEBUG: No way to access http module, will use mock implementation`);
+            }
+        } catch (e) {
+            // Not in Node.js or module not available
+            console.log(`[Like_a_Server] DEBUG: Error loading http module: ${e.message}`);
+        }
+        
+        if (http) {
+            // Real Node.js HTTP server implementation
+            try {
+                amishServerState.actualServer = http.createServer((req, res) => {
+                    // Handle requests based on registered routes
+                    const method = req.method;
+                    const url = req.url;
+                    const routeKey = `${method}:${url}`;
+                    
+                    if (amishServerState.buggyRoutes.has(routeKey)) {
+                        const handlerName = amishServerState.buggyRoutes.get(routeKey);
+                        res.writeHead(200, { 'Content-Type': 'text/html' });
+                        res.end(`<h1>Amish Paradise Server</h1><p>Route: ${url}</p><p>Handler: ${handlerName}</p>`);
+                    } else {
+                        res.writeHead(404, { 'Content-Type': 'text/html' });
+                        res.end('<h1>404 - Lost in the Cornfield</h1><p>This buggy trail does not exist!</p>');
+                    }
+                });
+                
+                amishServerState.actualServer.listen(amishServerState.churchBellPort, () => {
+                    amishServerState.barnIsRaised = true;
+                    console.log(`[Like_a_Server] Real Amish barn raised on port ${amishServerState.churchBellPort}!`);
+                    console.log(`[Like_a_Server] Visit http://localhost:${amishServerState.churchBellPort} to see your Amish paradise!`);
+                });
+                
+                // Keep the server alive by preventing the process from exiting
+                // A running http server should keep the event loop alive, but in the context of the interpreter, we need to be more explicit.
+                amishServerState.keepAlive = setInterval(() => {}, 1000);
+
+                process.on('SIGINT', () => {
+                    console.log('[Like_a_Server] Barn teardown initiated...');
+                    if (amishServerState.actualServer) {
+                        amishServerState.actualServer.close();
+                    }
+                    if (amishServerState.keepAlive) {
+                        clearInterval(amishServerState.keepAlive);
+                    }
+                    process.exit(0);
+                });
+                
+                return 27; // Success, blessed by the elders!
+            } catch (error) {
+                console.error(`[Like_a_Server] Barn raising failed: ${error.message}`);
+                return 0;
+            }
+        } else {
+            // Fallback mock implementation for CLI/testing
+            amishServerState.barnIsRaised = true;
+            console.log(`[Like_a_Server] Mock Amish barn raised on port ${amishServerState.churchBellPort} with community help!`);
+            console.log(`[Like_a_Server] Server simulation running - use Ctrl+C to stop`);
+            
+            // Keep the mock server alive by preventing immediate exit
+            amishServerState.keepAlive = setInterval(() => {
+                // Just keep the event loop alive
+            }, 1000);
+            
+            return 27;
+        }
     }
 }
 
@@ -45,6 +138,18 @@ export const LIKE_A_SERVER_LIBRARY = {
     amish_barn_teardown: {
         type: 'NativeFunction',
         call: () => {
+            if (amishServerState.actualServer) {
+                amishServerState.actualServer.close(() => {
+                    console.log('[Like_a_Server] Real barn torn down for winter, server stopped');
+                });
+                amishServerState.actualServer = null;
+            }
+            
+            if (amishServerState.keepAlive) {
+                clearInterval(amishServerState.keepAlive);
+                amishServerState.keepAlive = null;
+            }
+            
             amishServerState.barnIsRaised = false;
             console.log('[Like_a_Server] Barn torn down for winter, server stopped');
             return 27;

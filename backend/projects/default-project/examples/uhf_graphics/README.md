@@ -27,14 +27,9 @@ Interactive game demonstrating mouse click detection and dynamic graphics.
 
 ## How to run UHF examples:
 
-**CLI Mode (text output):**
+**How to run:**
 ```bash
-./yankovic example_name.yc
-```
-
-**Electron Mode (graphics):**
-```bash
-./yankovic example_name.yc --electron
+yankovic program.yc
 ```
 
 ## What these examples demonstrate:

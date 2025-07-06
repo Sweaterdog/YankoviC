@@ -98,6 +98,46 @@ class SimpleYankoviCInterpreter {
         for (const [name, value] of Object.entries(colors)) {
             this.globalScope.set(name, value);
         }
+
+        // --- Multimedia Functions ---
+        this.globalScope.set('fat_frame', (args) => {
+            const [imageUrl, x, y, width, height] = args;
+            const img = new Image();
+            img.onload = () => {
+                this.ctx.drawImage(img, x || 0, y || 0, width || img.width, height || img.height);
+            };
+            img.onerror = () => {
+                console.error('Failed to load image:', imageUrl);
+                // Draw a placeholder rectangle
+                this.ctx.fillStyle = '#ff0000';
+                this.ctx.fillRect(x || 0, y || 0, width || 100, height || 100);
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.font = '12px Arial';
+                this.ctx.fillText('Image failed to load', (x || 0) + 5, (y || 0) + 15);
+            };
+            img.src = imageUrl;
+        });
+        
+        this.globalScope.set('Lossless_Laughter', (args) => {
+            const [mediaUrl, type] = args;
+            let mediaElem = document.getElementById('uhf-media');
+            if (mediaElem) mediaElem.remove();
+            mediaElem = document.createElement(type === 'video' ? 'video' : 'audio');
+            mediaElem.id = 'uhf-media';
+            mediaElem.src = mediaUrl;
+            mediaElem.autoplay = true;
+            mediaElem.controls = true;
+            mediaElem.style.position = 'absolute';
+            mediaElem.style.left = '0';
+            mediaElem.style.top = '0';
+            mediaElem.style.maxWidth = '100%';
+            mediaElem.style.maxHeight = '100%';
+            mediaElem.style.zIndex = 1000;
+            document.body.appendChild(mediaElem);
+        });
+
+        // --- Debugging ---
+        this.globalScope.set('throw_dice', (args) => { console.log('Dice rolled:', args); return args; });
     }
 
     // A simplified lexer that ignores comments and complex directives

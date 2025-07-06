@@ -96,6 +96,35 @@ export class WebUHFRenderer {
         if (!this.ctx) return;
 
         switch (cmd.command) {
+            case 'play_media': {
+                // args: [mediaUrl, type ('audio'|'video')]
+                const [mediaUrl, type] = cmd.args;
+                let mediaElem = this.mediaElem;
+                if (mediaElem && mediaElem.parentNode) mediaElem.parentNode.removeChild(mediaElem);
+                mediaElem = document.createElement(type === 'video' ? 'video' : 'audio');
+                mediaElem.src = mediaUrl;
+                mediaElem.autoplay = true;
+                mediaElem.controls = true;
+                mediaElem.style.position = 'absolute';
+                mediaElem.style.left = '0';
+                mediaElem.style.top = '0';
+                mediaElem.style.maxWidth = '100%';
+                mediaElem.style.maxHeight = '100%';
+                mediaElem.style.zIndex = 1000;
+                this.canvas.parentNode.appendChild(mediaElem);
+                this.mediaElem = mediaElem;
+                break;
+            }
+            case 'show_image': {
+                // args: [imageUrl, x, y, width, height]
+                const [imageUrl, x, y, width, height] = cmd.args;
+                const img = new window.Image();
+                img.onload = () => {
+                    this.ctx.drawImage(img, x || 0, y || 0, width || img.width, height || img.height);
+                };
+                img.src = imageUrl;
+                break;
+            }
             case 'clear_screen':
                 this.backgroundColor = cmd.args[0] || '#000000';
                 this.ctx.fillStyle = this.backgroundColor;

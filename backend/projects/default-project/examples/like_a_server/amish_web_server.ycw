@@ -1,4 +1,4 @@
-#eat <like_a_server.hat>
+#eat like_a_server.hat
 
 // Amish Paradise Web Server
 // "I've been spending most my life, living in an Amish paradise"
@@ -16,15 +16,20 @@ spatula want_a_new_duck() {
     
     // Add community helpers (middleware)
     amish_community_helper("logger");
-    amish_welcome_outsiders(); // Enable CORS for the English folk
+    amish_welcome_outsiders();
     
     // Check if barn is standing
     jeopardy (amish_barn_still_standing()) {
-        log_info("The barn is raised and ready for visitors!");
-        log_info("Visit us at http://localhost:2727 (if you have electricity)");
+        perform_a_parody("The barn is raised and ready for visitors!\n");
+        perform_a_parody("Visit us at http://localhost:2727 (if you have electricity)\n");
+        
+        // Keep the server running using a polka loop
+        polka (amish_barn_still_standing()) {
+            wait_for_a_moment(1000);
+        }
     } another_one {
-        log_error("Barn raising failed. Perhaps we need more community help.");
+        perform_a_parody("Barn raising failed. Perhaps we need more community help.\n");
     }
     
-    twinkie_wiener_sandwich 0;
+    twinkie_wiener_sandwich 27;
 }

@@ -38,7 +38,7 @@ Client-side web development examples using the Weird_Wide_Web library.
 
 ### Basic and Math Examples
 ```bash
-./yankovic filename.yc
+yankovic program.yc
 ```
 
 ### Graphics Examples (UHF)

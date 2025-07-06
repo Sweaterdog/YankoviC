@@ -1,5 +1,5 @@
 #!/bin/bash
-# install.sh - Install all dependencies for YankoviC project
+# install.sh - Install all dependencies for YankoviC project and set up environment
 
 set -e
 
@@ -22,7 +22,16 @@ if [ -f frontend/package.json ]; then
   echo "Installing frontend dependencies..."
   cd frontend
   npm install
+  echo "Building VITE for CLI frontend..."
+  npm run build
   cd ..
 fi
 
-echo "All dependencies installed successfully!"
+# Add YankoviC to PATH for global CLI use
+if ! command -v yankovic &> /dev/null; then
+  echo "Adding YankoviC to PATH..."
+  ln -sf $(pwd)/cli.js /usr/local/bin/yankovic
+  chmod +x /usr/local/bin/yankovic
+fi
+
+echo "YankoviC installation and setup complete!"

@@ -1,0 +1,35 @@
+// Weird Al Portrait Display - A UHF Media Demo
+// This program demonstrates the new fat_frame function for displaying images
+// It shows a portrait of the legendary "Weird Al" Yankovic himself!
+
+// Start up the UHF broadcasting system
+// Channel 62 - now with multimedia support!
+start_the_show(800, 600, "Weird Al Portrait Gallery - UHF Channel 62");
+
+// Set up our broadcasting loop
+set_polka_speed(30);
+
+// Main display loop
+while (not the_shows_over()) {
+    roll_the_camera();
+    
+    // Paint a nice background for our portrait
+    paint_the_set(BLACK_MAGIC);
+    
+    // Display the portrait of Weird Al
+    // fat_frame(image_path, x, y, width, height)
+    fat_frame("al.jpeg", 50, 50, 700, 500);
+    
+    // Add some text to make it fancy
+    pick_a_hawaiian_shirt(TWINKIE_GOLD);
+    print_a_string_at("The Legendary Weird Al Yankovic", 200, 30);
+    
+    pick_a_hawaiian_shirt(WHITE_ZOMBIE);
+    print_a_string_at("UHF Channel 62 - Now with Multimedia Support!", 150, 570);
+    
+    that_is_a_wrap();
+    wait_for_a_moment(50);
+}
+
+// Clean up and sign off
+cancel_the_show();

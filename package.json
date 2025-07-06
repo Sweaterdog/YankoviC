@@ -12,6 +12,8 @@
     "electron": "^31.0.1"
   },
   "dependencies": {
+    "canvas": "^3.1.2",
+    "open": "^10.1.2",
     "readline-sync": "^1.4.10"
   }
 }
