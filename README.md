@@ -1,4 +1,4 @@
-# 🎵 YankoviC Programming Language v1.1.0 
+# 🎵 YankoviC Programming Language v1.1.1 
 
 *"Dare to be Stupid" - A Programming Language for the Accordion-Minded*
 
@@ -69,10 +69,11 @@ spatula want_a_new_duck() {
 - npm or yarn
 
 ### Installation
+Git may lock your access to the code / folders in the project! In that case you must download the ZIP manually instead of running `git clone`
 Run the following command to install all dependencies, set up the environment, and add YankoviC to your PATH for global CLI use:
 
 ```bash
-sudo ./install.sh
+./install.sh
 ```
 
 This installer only works for Linux (Maybe MacOS idk), windows users will have to open it up and do it all manually
