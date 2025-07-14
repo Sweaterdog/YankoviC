@@ -3,9 +3,7 @@
 *"Dare to be Stupid" - A Programming Language for the Accordion-Minded*
 
 Welcome to **YankoviC**, the most ridiculously awesome programming language inspired by the legendary "Weird Al" Yankovic! YankoviC combines the power of structured programming with the whimsy of polka music and the humor of the world's greatest musical parodist.
-
 <img src="backend/projects/images/YankoviC_logo.png" width="720">
-
 ### ✅ What's Working:
 - **Complete CLI and IDE** - Full development environment with AI assistant
 - **Graphics Programming** - UHF graphics library with animations and games  
