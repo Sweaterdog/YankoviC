@@ -3,6 +3,7 @@ import cors from 'cors';
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { exec } from 'child_process';
 
 const app = express();
 const PORT = 3001;
@@ -65,6 +66,7 @@ app.get('/api/file-content', async (req, res) => {
         const content = await fs.readFile(filePath, 'utf-8');
         res.json({ content });
     } catch (error) {
+        console.error('[API] 404 File not found:', filePath, '| Project:', project, '| File param:', file);
         res.status(404).json({ error: 'File not found.' });
     }
 });
@@ -138,6 +140,87 @@ app.delete('/api/delete-folder', async (req, res) => {
     }
 });
 
+// --- Run Terminal Command (DEV ONLY) ---
+// Persistent cwd per session
+const sessionCwds = {};
+const DEFAULT_CWD = PROJECTS_ROOT;
+function getSessionId(req) {
+    // Try header, body, or generate new
+    return req.body.sessionId || req.headers['x-session-id'] || null;
+}
+function generateSessionId() {
+    return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+app.post('/api/exec', async (req, res) => {
+    let { command, sessionId } = req.body;
+    if (!command || typeof command !== 'string') {
+        return res.status(400).json({ error: 'No command provided.' });
+    }
+    // Only allow in dev mode for safety
+    if (process.env.NODE_ENV === 'production') {
+        return res.status(403).json({ error: 'Terminal command execution is disabled in production.' });
+    }
+    // Basic validation: disallow some dangerous commands
+    const forbidden = ['rm ', 'shutdown', 'reboot', 'init ', 'halt', 'mkfs', 'dd ', '>:'];
+    if (forbidden.some(f => command.includes(f))) {
+        return res.status(403).json({ error: 'Forbidden command.' });
+    }
+    // Session ID logic
+    if (!sessionId) {
+        sessionId = generateSessionId();
+    }
+    if (!sessionCwds[sessionId]) {
+        sessionCwds[sessionId] = DEFAULT_CWD;
+    }
+    let cwd = sessionCwds[sessionId];
+    // Handle 'cd' commands
+    const cdMatch = command.match(/^\s*cd\s+(.+)$/);
+    if (cdMatch) {
+        let newPath = cdMatch[1].trim();
+        // Remove surrounding quotes if present
+        if ((newPath.startsWith('"') && newPath.endsWith('"')) || (newPath.startsWith("'") && newPath.endsWith("'"))) {
+            newPath = newPath.slice(1, -1);
+        }
+        if (!path.isAbsolute(newPath)) {
+            newPath = path.resolve(cwd, newPath);
+        }
+        if (fs.existsSync(newPath) && fs.statSync(newPath).isDirectory()) {
+            sessionCwds[sessionId] = newPath;
+            cwd = newPath;
+            return res.json({ stdout: '', stderr: '', cwd, sessionId });
+        } else {
+            return res.json({ stdout: '', stderr: `cd: no such directory: ${cdMatch[1]}`, cwd, sessionId });
+        }
+    }
+    // Handle 'cd ... && ...' or other commands
+    // If command starts with 'cd ... &&', update cwd before running rest
+    const cdAndCmd = command.match(/^\s*cd\s+([^&]+)\s*&&\s*(.+)$/);
+    if (cdAndCmd) {
+        let newPath = cdAndCmd[1].trim();
+        // Remove surrounding quotes if present
+        if ((newPath.startsWith('"') && newPath.endsWith('"')) || (newPath.startsWith("'") && newPath.endsWith("'"))) {
+            newPath = newPath.slice(1, -1);
+        }
+        let restCmd = cdAndCmd[2];
+        if (!path.isAbsolute(newPath)) {
+            newPath = path.resolve(cwd, newPath);
+        }
+        if (fs.existsSync(newPath) && fs.statSync(newPath).isDirectory()) {
+            sessionCwds[sessionId] = newPath;
+            cwd = newPath;
+            command = restCmd;
+        } else {
+            return res.json({ stdout: '', stderr: `cd: no such directory: ${cdAndCmd[1]}`, cwd, sessionId });
+        }
+    }
+    exec(command, { cwd, timeout: 10000, maxBuffer: 1024 * 1024 }, (err, stdout, stderr) => {
+        if (err) {
+            return res.json({ stdout, stderr: stderr + (err.message ? ('\n' + err.message) : ''), cwd, sessionId });
+        }
+        res.json({ stdout, stderr, cwd, sessionId });
+    });
+});
 
 app.listen(PORT, () => {
     console.log(`The Accordion Backend is playing on http://localhost:${PORT}`);

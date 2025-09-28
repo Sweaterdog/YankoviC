@@ -31,5 +31,5 @@ spatula want_a_new_duck() {
         }
         that_is_a_wrap();
     }
-    twinkie_wiener_sandwich 0;
+    twinkie_wiener_sandwich 27;
 }

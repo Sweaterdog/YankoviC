@@ -1,6 +1,6 @@
 # YankoviC Examples Directory
 
-Welcome to the YankoviC examples! This directory contai- **Use the Right Mode** - Graphics examples need `--electron` flag, web examples use `.ycw` extensions organized examples demonstrating different aspects of the YankoviC programming language.
+Welcome to the YankoviC examples! This directory contains various examples of how to code inside of YankoviC!
 
 ## Directory Structure
 

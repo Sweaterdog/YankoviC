@@ -1,0 +1,23 @@
+#eat <weird_wide_web.hat>
+
+// This function will be called for each chunk of the AI's response
+spatula stream_handler(verse chunk) {
+    string_along(chunk);
+    twinkie_wiener_sandwich 0;
+}
+
+spatula want_a_new_duck() {
+    perform_a_parody("Starting AI chat stream...");
+
+    // Start the amish_mail function in the background
+    the_saga_begins("amish_mail", "Write a short, funny song about programming.", "openai", its_a_fact, "stream_handler");
+
+    // You could do other things here while the AI is thinking...
+    perform_a_parody("The AI is thinking... I can do other things now!");
+
+    // Now, wait for the streaming to finish
+    wait_for_the_saga_to_end();
+
+    perform_a_parody("\\nAI chat stream finished!");
+    twinkie_wiener_sandwich 27;
+}

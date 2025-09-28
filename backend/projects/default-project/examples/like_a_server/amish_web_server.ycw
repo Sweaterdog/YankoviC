@@ -4,6 +4,11 @@
 // "I've been spending most my life, living in an Amish paradise"
 // Building a web server the plain folk way!
 
+// Note: 
+// Websites cannot be hosted within The Accordion
+// The CLI is the only way to properly run YankoviC Web code.
+// And no, the Backstage Pass also cannot start Websites...
+
 spatula want_a_new_duck() {
     // Raise the barn (start the server) on port 2727
     spatula server_status = amish_barn_raising(2727);

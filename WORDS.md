@@ -36,6 +36,8 @@ These are the fundamental building blocks of the YankoviC language.
 | `accordion_solo` | `void` | Represents the absence of a value. It's a function that does something purely for the performance, without returning a result. |
 | `perform_a_parody(text, ...)` | `printf`, `console.log` | Prints text (and optional values) to the terminal/console. Supports format codes: %verse, %spatula, %horoscope. |
 | `flesh_eating_weasels(prompt)` | `scanf`, `cin >>`, `readline` | Reads input from the terminal/console. Takes an optional prompt string. Named after Al's panicked screaming in "Albuquerque." |
+| `dare_to_be_stupid { ... } put_down_the_chainsaw (err) { ... }` | `try { ... } catch (err) { ... }` | Try/catch error handling. "Dare to be Stupid" is the try block; "put_down_the_chainsaw" is the catch block. If an error occurs, the catch block runs with the error as a variable. |
+| `stop_forwarding_that_crap duration pentium;` | `sleep(duration)` | Pauses execution for a number of milliseconds. Optionally specify a "pentium" (CPU core) for fun. Named after a classic Weird Al lyric. |
 
 ## Import Directives
 
@@ -44,6 +46,20 @@ These are the fundamental building blocks of the YankoviC language.
 | `#eat <library.hat>` | Imports a standard library (angle brackets), always a `.hat` file |
 | `#eat "filename.yc"` | Imports a user file (quotes), can be a `.hat` file |
 | `#eat filename.yc` | Imports a user file (bare name), can be a `.hat` file |
+
+## Import Rules (VERY IMPORTANT!)
+
+- `#eat <library.hat>` or `#eat <library>`: Loads a built-in or user library. The extension is optional for built-ins.
+- `#eat "userlib.hat"`: Loads a user-made library file. **Quoted imports only work for .hat files!**
+- `#eat userlib.yc`: Loads a user-made code file. **Unquoted imports work for both .hat and .yc files.**
+- `#eat "userlib.yc"` is NOT valid and will not work.
+
+> **Summary:**
+> - Use quotes only for `.hat` files: `#eat "my_lib.hat"`
+> - For `.yc` files, do NOT use quotes: `#eat my_code.yc`
+> - Built-in libraries can be imported with or without extension and without quotes.
+
+If you try to import a `.yc` file with quotes, the interpreter will not find it!
 
 ## Comments
 
@@ -130,27 +146,21 @@ spatula main() {
 }
 ```
 
-// For web output, see the Like_a_Server and Weird_Wide_Web sections below.
-
-### UHF Multimedia Functions
-
-| Function | Description & Rationale |
-|---|---|
-| `Lossless_Laughter(url, type)` | Plays audio or video files. First argument is the file URL/path, second is "audio" or "video". Named after Al's ability to create perfect musical parodies with lossless quality. |
-| `fat_frame(url, x, y, width, height)` | Displays image files at specified coordinates and size. All arguments required: image URL/path, x position, y position, width, height. Named after Al's classic "Fat" parody. |
-
-### UHF Color Constants
-
-| Constant | RGB Values | Description |
-|---|---|---|
-| `AL_RED` | (237, 28, 36) | The signature Al red |
-| `WHITE_ZOMBIE` | (240, 240, 240) | Nearly white |
-| `BLACK_MAGIC` | (16, 16, 16) | Nearly black |
-| `SPAM_GREEN` | (0, 255, 0) | Bright green |
-| `TWINKIE_GOLD` | (255, 242, 0) | Golden yellow |
-| `ORANGE_CHEESE` | (255, 127, 39) | Cheesy orange |
-| `SKY_BLUE_FOR_YOU` | (135, 206, 235) | Sky blue |
-| `SILVER_SPATULA` | (200, 200, 200) | Silver gray |
+### Example: Error Handling and Sleep (Weird Al Style)
+```yankovic
+spatula want_a_new_duck() {
+    dare_to_be_stupid {
+        perform_a_parody("Trying something risky...");
+        stop_forwarding_that_crap 1000; // Sleep for 1000ms (1 second)
+        // stop_forwarding_that_crap 500 2; // Sleep for 500ms on pentium 2 (see note below)
+        perform_a_parody("If you see this, no error happened!");
+    } put_down_the_chainsaw (err) {
+        perform_a_parody("Oops! Caught an error: %verse", err);
+    }
+    twinkie_wiener_sandwich 27;
+}
+```
+> **Note:** The optional `pentium` argument in `stop_forwarding_that_crap` only has an effect when using the Like_a_Server or Weird_Wide_Web libraries, where it can control which server thread/core is paused. In standard YankoviC, it is just for fun and logging.
 
 ## The "Virus_Alert" OS Library (`#eat <virus_alert.hat>`)
 
@@ -677,6 +687,20 @@ spatula want_a_new_duck() {
         }
         that_is_a_wrap();
     }
+    twinkie_wiener_sandwich 27;
+}
+```
+
+---
+
+### Example: Per-Pentium Sleep Demo (Like_a_Server)
+```yankovic
+#eat <Like_a_Server.hat>
+
+spatula want_a_new_duck() {
+    perform_a_parody("Before sleep on pentium 2\n");
+    stop_forwarding_that_crap 2000 2; // Sleep for 2 seconds on pentium 2
+    perform_a_parody("After sleep on pentium 2\n");
     twinkie_wiener_sandwich 27;
 }
 ```

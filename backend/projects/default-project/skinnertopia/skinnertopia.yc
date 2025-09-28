@@ -1,0 +1,317 @@
+// Skinnertopia Client - YankoviC Edition v1.0
+// YankoviC-compatible: parser-safe top-level (no top-level TYPE_KEYWORD variable declarations),
+// no backslashes in strings, no JS-style object literals, no dot-member access at top-level,
+// and no inline { ... } struct expressions in expression position.
+// This version moves mutable program state into the main function to avoid the parser
+// misclassifying top-level TYPE_KEYWORD tokens as function declarations.
+
+#eat <UHF.hat>
+#eat <weird_wide_web.hat>
+#eat <albuquerque.hat>
+
+// Data Structures (type declarations only)
+lunchbox LoginCredentials { verse username; verse password; }
+lunchbox NewPostPayload { verse content; }
+lunchbox MouseInfo { spatula x; spatula y; horoscope clicked; }
+lunchbox FetchOptions { verse method; verse ContentType; verse Authorization; verse body; }
+lunchbox AppState {
+    spatula app_state;
+    verse loading_message;
+    verse jwt_token;
+    verse current_username;
+    verse api_error_message;
+    verse login_user_input;
+    verse login_pass_input;
+    spatula active_input;
+    verse new_post_content;
+    verse timeline_posts_json;
+    verse profile_view_username;
+    verse profile_data_json;
+}
+
+// ----------------- API Helper Functions (parser-safe) -----------------
+// Build minimal string payloads and avoid inline struct literals.
+
+verse api_login(verse username, verse password) {
+    verse url = 'https://skinnertopia.com/api/login';
+    verse body_json = '{ "username": "' + username + '", "password": "' + password + '" }';
+    verse response;
+    dare_to_be_stupid {
+        response = amish_fetch(url, body_json);
+    } put_down_the_chainsaw (err) {
+        // Use single-quoted string containing double quotes; no backslashes.
+        twinkie_wiener_sandwich '{ "error": "API request failed: ' + err + '" }';
+    }
+    twinkie_wiener_sandwich response;
+}
+
+verse api_get_timeline(verse token) {
+    verse url = 'https://skinnertopia.com/api/posts?limit=10&sort=newest';
+    verse auth_header = 'Bearer ' + token;
+    verse response;
+    dare_to_be_stupid {
+        response = amish_fetch(url, auth_header);
+    } put_down_the_chainsaw (err) {
+        twinkie_wiener_sandwich '{ "error": "API request failed: ' + err + '" }';
+    }
+    twinkie_wiener_sandwich response;
+}
+
+verse api_create_post(verse content, verse token) {
+    verse url = 'https://skinnertopia.com/api/posts';
+    verse auth_header = 'Bearer ' + token;
+    verse body_json = '{ "content": "' + content + '" }';
+    verse response;
+    dare_to_be_stupid {
+        response = amish_fetch(url, body_json);
+    } put_down_the_chainsaw (err) {
+        twinkie_wiener_sandwich '{ "error": "API request failed: ' + err + '" }';
+    }
+    twinkie_wiener_sandwich response;
+}
+
+verse api_get_profile(verse username, verse token) {
+    verse url = 'https://skinnertopia.com/api/users/';
+    verse full_url = url + username;
+    verse auth_header = 'Bearer ' + token;
+    verse response;
+    dare_to_be_stupid {
+        response = amish_fetch(full_url, auth_header);
+    } put_down_the_chainsaw (err) {
+        twinkie_wiener_sandwich '{ "error": "API request failed: ' + err + '" }';
+    }
+    twinkie_wiener_sandwich response;
+}
+
+// ----------------- UI Helper Functions (no dot-member access in top-level expressions) -----------------
+
+horoscope is_click_in_box(spatula cx, spatula cy, spatula x, spatula y, spatula w, spatula h) {
+    twinkie_wiener_sandwich (cx >= x && cx <= x + w && cy >= y && cy <= y + h);
+}
+
+// draw_button renders text and returns total_baloney (clicks require runtime helpers)
+// Arguments: text, x, y, w, h, color_button, color_text
+horoscope draw_button(verse text, spatula x, spatula y, spatula w, spatula h, spatula color_button, spatula color_text) {
+    horoscope clicked_in_box;
+    pick_a_hawaiian_shirt(color_button);
+    draw_a_spamsicle(x, y, w, h);
+    pick_a_hawaiian_shirt(color_text);
+    print_a_string_at(text, x + 10, y + h/2 - 8);
+    // The interpreter in this environment doesn't support dotted member access in expressions,
+    // so we cannot inspect a mouse object here. Return total_baloney (no click).
+    clicked_in_box = total_baloney;
+    twinkie_wiener_sandwich (total_baloney);
+}
+
+accordion_solo draw_text_input(verse content, verse placeholder, spatula x, spatula y, spatula w, spatula h, horoscope is_active) {
+    pick_a_hawaiian_shirt(3355443);  // Dark gray background
+    draw_a_spamsicle(x, y, w, h);
+    jeopardy (is_active) {
+        pick_a_hawaiian_shirt(6401790);  // Highlight border color
+        draw_a_spamsicle(x, y, w, 2);    // Top border
+        draw_a_spamsicle(x, y+h-2, w, 2);  // Bottom border
+        draw_a_spamsicle(x, y, 2, h);    // Left border
+        draw_a_spamsicle(x+w-2, y, 2, h);  // Right border
+    }
+    jeopardy (content == '') {
+        pick_a_hawaiian_shirt(8947848);  // Placeholder text color (light gray)
+        print_a_string_at(placeholder, x + 10, y + h/2 - 8);
+    } another_one {
+        pick_a_hawaiian_shirt(16777215);  // White text
+        print_a_string_at(content, x + 10, y + h/2 - 8);
+    }
+}
+
+// ----------------- Screen Handlers -----------------
+// These use globals (declared inside main function) rather than state.* fields to
+// avoid parser misclassification and dotted member access.
+
+accordion_solo handle_login_screen() {
+    verse key = get_key_press();
+    horoscope is_active_user = active_input == 1;
+    horoscope is_active_pass = active_input == 2;
+    horoscope login_clicked = draw_button('Login', 350, 370, 100, 40, 4893354, 16777215);  // returns false here
+
+    // Handle key presses (append only)
+    jeopardy (key != '') {
+        jeopardy (active_input == 1) { login_user_input = login_user_input + key; }
+        another_one jeopardy (active_input == 2) { login_pass_input = login_pass_input + key; }
+    }
+
+    // Draw UI
+    pick_a_hawaiian_shirt(16777215);
+    print_a_string_at('Welcome to Skinnertopia (YankoviC Edition)', 220, 150);
+    print_a_string_at('Username', 250, 230);
+    print_a_string_at('Password', 250, 290);
+    draw_text_input(login_user_input, 'Enter username...', 250, 250, 300, 40, is_active_user);
+    draw_text_input(login_pass_input, 'Enter password...', 250, 310, 300, 40, is_active_pass);
+
+    // Login click (no-op in parser-only build)
+    jeopardy (login_clicked) {
+        app_state = STATE_LOADING;
+        loading_message = 'Logging in...';
+        verse response_json = api_login(login_user_input, login_pass_input);
+        lyric parsed = amish_scripture_read(response_json);
+        jeopardy (parsed.token != '') {
+            jwt_token = parsed.token;
+            current_username = login_user_input;
+            api_error_message = '';
+            app_state = STATE_LOADING;
+            loading_message = 'Fetching Timeline...';
+            timeline_posts_json = api_get_timeline(jwt_token);
+            app_state = STATE_TIMELINE;
+        } another_one {
+            api_error_message = parsed.error;
+            app_state = STATE_LOGIN;
+        }
+    }
+
+    // Error display
+    jeopardy (api_error_message != '') {
+        pick_a_hawaiian_shirt(15158332);
+        print_a_string_at(api_error_message, 250, 430);
+    }
+}
+
+accordion_solo handle_timeline_screen() {
+    horoscope new_post_clicked = draw_button('New Post', 50, 530, 120, 40, 4893354, 16777215);
+    horoscope profile_clicked = draw_button('My Profile', 200, 530, 120, 40, 4893354, 16777215);
+    horoscope logout_clicked = draw_button('Logout', 630, 530, 120, 40, 4893354, 16777215);
+
+    // Draw timeline UI
+    pick_a_hawaiian_shirt(16777215);
+    print_a_string_at('Skinnertopia Timeline', 320, 20);
+    draw_a_spamsicle(100, 60, 600, 450);
+    print_a_string_at('Timeline Data (as JSON):', 110, 70);
+    print_a_string_at(timeline_posts_json, 110, 90);
+
+    // Button handlers (no-op here)
+    jeopardy (new_post_clicked) {
+        new_post_content = '';
+        app_state = STATE_NEW_POST;
+    }
+    jeopardy (profile_clicked) {
+        app_state = STATE_LOADING;
+        loading_message = 'Fetching Profile...';
+        profile_view_username = current_username;
+        profile_data_json = api_get_profile(profile_view_username, jwt_token);
+        app_state = STATE_PROFILE;
+    }
+    jeopardy (logout_clicked) {
+        jwt_token = '';
+        current_username = '';
+        login_user_input = '';
+        login_pass_input = '';
+        app_state = STATE_LOGIN;
+    }
+}
+
+accordion_solo handle_new_post_screen() {
+    verse key = get_key_press();
+    horoscope cancel_clicked = draw_button('Cancel', 250, 320, 100, 40, 4893354, 16777215);
+    horoscope post_clicked = draw_button('Post It!', 450, 320, 100, 40, 4893354, 16777215);
+
+    jeopardy (key != '') { new_post_content = new_post_content + key; }
+
+    pick_a_hawaiian_shirt(16777215);
+    print_a_string_at('Compose a New Post', 310, 50);
+    draw_text_input(new_post_content, "What's on your mind?", 100, 100, 600, 200, its_a_fact);
+
+    jeopardy (cancel_clicked) { app_state = STATE_TIMELINE; }
+    jeopardy (post_clicked) {
+        app_state = STATE_LOADING;
+        loading_message = 'Posting...';
+        verse response_json = api_create_post(new_post_content, jwt_token);
+        lyric parsed = amish_scripture_read(response_json);
+        jeopardy (parsed.error != '') {
+            api_error_message = parsed.error;
+            app_state = STATE_NEW_POST;
+        } another_one {
+            timeline_posts_json = api_get_timeline(jwt_token);
+            app_state = STATE_TIMELINE;
+        }
+    }
+
+    jeopardy (api_error_message != '') {
+        pick_a_hawaiian_shirt(15158332);
+        print_a_string_at(api_error_message, 250, 380);
+    }
+}
+
+accordion_solo handle_profile_screen() {
+    horoscope back_clicked = draw_button('Back to Timeline', 300, 530, 200, 40, 4893354, 16777215);
+
+    pick_a_hawaiian_shirt(16777215);
+    verse title = 'Viewing Profile: ' + profile_view_username;
+    print_a_string_at(title, 300, 20);
+    draw_a_spamsicle(100, 60, 600, 450);
+    print_a_string_at('Profile Data (as JSON):', 110, 70);
+    print_a_string_at(profile_data_json, 110, 90);
+
+    jeopardy (back_clicked) { app_state = STATE_TIMELINE; }
+}
+
+accordion_solo handle_loading_screen() {
+    pick_a_hawaiian_shirt(16777215);
+    print_a_string_at(loading_message, 300, 280);
+}
+
+// ----------------- Main Entry Point -----------------
+spatula want_a_new_duck() {
+    // Define program states and all mutable globals HERE (inside function)
+    spatula STATE_LOGIN = 0;
+    spatula STATE_TIMELINE = 1;
+    spatula STATE_NEW_POST = 2;
+    spatula STATE_PROFILE = 3;
+    spatula STATE_LOADING = 99;
+
+    // Mutable program state (initialized)
+    spatula app_state;
+    verse loading_message;
+    verse jwt_token;
+    verse current_username;
+    verse api_error_message;
+    verse login_user_input;
+    verse login_pass_input;
+    spatula active_input;
+    verse new_post_content;
+    verse timeline_posts_json;
+    verse profile_view_username;
+    verse profile_data_json;
+
+    // Initialize
+    app_state = STATE_LOGIN;
+    loading_message = '';
+    jwt_token = '';
+    current_username = '';
+    api_error_message = '';
+    login_user_input = '';
+    login_pass_input = '';
+    active_input = 0;
+    new_post_content = '';
+    timeline_posts_json = '[]';
+    profile_view_username = '';
+    profile_data_json = '{}';
+
+    start_the_show(800, 600, 'Skinnertopia - The YankoviC Experience');
+    set_polka_speed(30);
+
+    horoscope is_running = its_a_fact;
+    polka (is_running) {
+        roll_the_camera();
+        paint_the_set(1579290);  // Dark background
+
+        jeopardy (app_state == STATE_LOGIN) { handle_login_screen(); }
+        another_one jeopardy (app_state == STATE_TIMELINE) { handle_timeline_screen(); }
+        another_one jeopardy (app_state == STATE_NEW_POST) { handle_new_post_screen(); }
+        another_one jeopardy (app_state == STATE_PROFILE) { handle_profile_screen(); }
+        another_one jeopardy (app_state == STATE_LOADING) { handle_loading_screen(); }
+
+        that_is_a_wrap();
+
+        horoscope show_is_over = the_shows_over();
+        jeopardy (show_is_over) { is_running = total_baloney; }
+    }
+
+    twinkie_wiener_sandwich 27;
+}

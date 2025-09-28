@@ -45,3 +45,8 @@ export async function deleteFolder(projectName, folderPath) {
         data: { project: projectName, folder: folderPath } 
     });
 }
+
+export async function execCommand(command, sessionId) {
+    const response = await axios.post(`${API_BASE_URL}/exec`, { command, sessionId });
+    return response.data;
+}

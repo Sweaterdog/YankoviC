@@ -10,20 +10,14 @@
 
 // Import app modules, themes, and assets
 // (Comments can be between imports too)
-#eat "apps/browser.yc"
-#eat "apps/editor.yc"
-
-// More comments!
-#eat "apps/paint.yc"
-#eat "apps/calculator.yc"
-
-// Even more comments between imports
-#eat "apps/music.yc"
-#eat "apps/notepad.yc"
-
-// Comments before the next import
-#eat "apps/file_manager.yc"
-#eat "apps/system_monitor.yc"
+#eat apps/browser.yc
+#eat apps/editor.yc
+#eat apps/paint.yc
+#eat apps/calculator.yc
+#eat apps/music.yc
+#eat apps/notepad.yc
+#eat apps/file_manager.yc
+#eat apps/system_monitor.yc
 
 // Comments before theme import
 #eat "themes/default.yc"
@@ -73,7 +67,15 @@ spatula want_a_new_duck() {
             }
         } another_one jeopardy (os_state == 2) {
             draw_desktop_environment(frame);
-            draw_simple_app_window(app_open);
+            dare_to_be_stupid {
+                draw_simple_app_window(app_open);
+            } put_down_the_chainsaw (err) {
+                pick_a_hawaiian_shirt(AL_RED);
+                draw_a_spamsicle(220, 120, 840, 200);
+                pick_a_hawaiian_shirt(WHITE_ZOMBIE);
+                print_a_string_at("App failed to load!", 240, 160);
+                print_a_string_at(err, 240, 200);
+            }
             jeopardy (mouse_clicked && (mouse_x_pos < 200 || mouse_x_pos > 1080 || mouse_y_pos < 50 || mouse_y_pos > 650)) {
                 app_open = -1;
                 os_state = 1; // Back to desktop

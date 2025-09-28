@@ -82,6 +82,17 @@ class SimpleYankoviCInterpreter {
         this.globalScope.set('mouse_was_clicked', () => this.uiState.mouse.clicked);
         this.globalScope.set('button_was_clicked', (args) => this.uiState.buttons[args[0]]?.clicked || false);
 
+        // --- Console I/O ---
+        this.globalScope.set('perform_a_parody', (args) => {
+            // In this dedicated window, we can just use console.log
+            console.log(...args);
+        });
+        this.globalScope.set('flesh_eating_weasels', async (args) => {
+            const promptText = args[0] || '';
+            // Use Electron's IPC to request input from the main process
+            return await window.cliAPI.prompt(promptText);
+        });
+
         // --- Math ---
         this.globalScope.set('sin', (args) => Math.sin(args[0]));
         this.globalScope.set('cos', (args) => Math.cos(args[0]));

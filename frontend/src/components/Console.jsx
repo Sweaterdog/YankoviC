@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 const PanelContainer = styled.div`
@@ -59,8 +59,21 @@ const OutputArea = styled.pre`
   font-size: 14px;
 `;
 
-function Console({ output, onRun, onStop, isRunning, layout, setLayout }) {
+const InputArea = styled.input`
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-top: 1px solid #333;
+  background: #181818;
+  color: #d4d4d4;
+  font-size: 15px;
+  font-family: monospace;
+  outline: none;
+`;
+
+function Console({ output, onRun, onStop, isRunning, layout, setLayout, onCommand, prompt }) {
   const outputRef = useRef(null);
+  const [input, setInput] = useState("");
 
   useEffect(() => {
     if (outputRef.current) outputRef.current.scrollTop = outputRef.current.scrollHeight;
@@ -69,6 +82,15 @@ function Console({ output, onRun, onStop, isRunning, layout, setLayout }) {
   if (!layout.console) {
       return <PanelHeader onClick={() => setLayout(l => ({...l, console: true}))}>Backstage Pass (Console)</PanelHeader>
   }
+
+  const handleInputKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      if (input.trim()) {
+        onCommand?.(input);
+        setInput("");
+      }
+    }
+  };
 
   return (
     <PanelContainer>
@@ -82,6 +104,18 @@ function Console({ output, onRun, onStop, isRunning, layout, setLayout }) {
         <CloseButton onClick={() => setLayout(l => ({...l, console: false}))}>×</CloseButton>
       </PanelHeader>
       <OutputArea ref={outputRef}>{output}</OutputArea>
+      <div style={{ display: 'flex', alignItems: 'center', background: '#181818' }}>
+        <span style={{ color: '#6cf', fontFamily: 'monospace', padding: '0 6px 0 8px', fontSize: 15 }}>{prompt || '$'}</span>
+        <InputArea
+          type="text"
+          placeholder="Type YankoviC code or !ls, !pwd, etc. for terminal..."
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={handleInputKeyDown}
+          spellCheck={false}
+          autoFocus
+        />
+      </div>
     </PanelContainer>
   );
 }

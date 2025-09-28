@@ -5,6 +5,9 @@ import { LIKE_A_SERVER_LIBRARY } from './Like_a_Server.hat.js';
 import { WEIRD_WIDE_WEB_LIBRARY } from './Weird_Wide_Web.hat.js';
 import { VIRUS_ALERT_LIBRARY } from './virus_alert.hat.js';
 
+// Import readline for CLI input, only in Node.js environment
+
+
 // console.log('=== YANKOVIC INTERPRETER LOADED v2024-07-06-YODA-RENAME-v4 ===');
 // console.log('UHF_LIBRARY keys:', Object.keys(UHF_LIBRARY));
 
@@ -13,7 +16,7 @@ class Scope {
         this.parent = parent;
         this.variables = new Map();
     }
-    define(name, value, isStupid = false) {
+    set(name, value, isStupid = false) {
         if (this.variables.has(name) && this.variables.get(name).isStupid) throw new Error(`Word Crime! Cannot reassign a 'stupid' variable: ${name}`);
         this.variables.set(name, { value, isStupid });
     }
@@ -26,38 +29,154 @@ class Scope {
         throw new Error(`Reference Error: Cannot assign to undeclared variable '${name}'.`);
     }
     get(name) {
-        if (this.variables.has(name)) return this.variables.get(name).value;
-        if (this.parent) return this.parent.get(name);
+        if (this.variables.has(name)) {
+            return this.variables.get(name).value;
+        }
+        if (this.parent) {
+            return this.parent.get(name);
+        }
+        // Fallback to global scope for functions
+        if (this.parent === null && globalThis.interpreter && globalThis.interpreter.globalScope.variables.has(name)) {
+            return globalThis.interpreter.globalScope.get(name);
+        }
         throw new Error(`Reference Error: The variable '${name}' is not defined. What're you thinkin'?`);
     }
 }
 
 export class YankoviCInterpreter {
-    constructor(libraryOverrides = {}) {
-        this.libraryOverrides = libraryOverrides;
-        this.outputBuffer = [];
-        this.tokens = [];
-        this.pos = 0;
-        this.globalScope = null;
-        this.polkaLoop = null;
-        this.showIsOver = false;
-        this.frameCount = 0;
-        this.drawCommandBuffer = [];
-        this.isRunningFrame = false;
-        this.imports = new Map();
-        this.projectName = 'default-project';
-        this.uiState = { mouse: {}, keys: {}, buttons: {}, textBoxes: {}, checkboxes: {}, sliders: {} };
-        this.declaredLunchboxTypes = new Set(); // Track user-defined lunchbox types
+    constructor(options = {}) {
+        console.log("--- Interpreter Constructor ---");
+        console.log("Received options:", options);
+        console.log("Is streamPrintFunction a function?", typeof options.streamPrintFunction === 'function');
 
-        // Listen for UI state updates from Electron
-        if (typeof window !== 'undefined' && window.electronAPI) {
-            window.electronAPI.onUIStateUpdate((state) => { this.uiState = state; });
-        }
+        this.globalScope = new Scope();
+        this.outputBuffer = [];
+        this.libraries = new Map();
+        this.polkaLoop = false;
+        this.frameCount = 0;
+        this.maxFrames = null;
+        this.isFrameRunning = false;
+        this.activeSagas = []; // For async operations
+        this.libraryOverrides = options.libraryOverrides || {};
+
+        // Allow custom I/O functions to be passed in
+        this.printFunction = options.printFunction || ((text) => this.outputBuffer.push(text));
+        this.streamPrintFunction = options.streamPrintFunction || ((text) => {
+            // Default behavior if no stream function is provided
+            const last = this.outputBuffer.length > 0 ? this.outputBuffer.pop() : '';
+            this.outputBuffer.push(last + text);
+        });
+        this.inputFunction = options.inputFunction || (() => Promise.resolve(""));
+
+        console.log("Assigned streamPrintFunction:", this.streamPrintFunction.toString());
+        console.log("-----------------------------");
+
+        this.initializeStandardLibrary();
+        globalThis.interpreter = this; // Make interpreter instance globally available
     }
-    log(message) { 
-        // Add timestamp and context to understand when logs are generated
-        const context = this.isRunningFrame ? '[FRAME]' : '[MAIN]';
-        this.outputBuffer.push(`${context} ${message}`); 
+
+    log(message) {
+        this.printFunction(message);
+    }
+
+    initializeStandardLibrary() {
+        this.globalScope.set('perform_a_parody', {
+            type: 'NativeFunction',
+            call: (args) => {
+                if (args.length === 0) return;
+                let formatString = args[0];
+                let argIndex = 1;
+                const result = formatString.replace(/%(\w+)/g, (match, type) => {
+                    if (argIndex < args.length) {
+                        const value = args[argIndex++];
+                        if (type === 'verse') return String(value);
+                        if (type === 'spatula') return Number(value);
+                        if (type === 'horoscope') return value ? 'its_a_fact' : 'total_baloney';
+                        return match; // Return original if type is unknown
+                    }
+                    return match;
+                });
+                this.printFunction(result);
+            }
+        });
+
+        this.globalScope.set('string_along', {
+            type: 'NativeFunction',
+            call: (args) => {
+                this.streamPrintFunction(args.join(' '));
+            }
+        });
+
+        this.globalScope.set('the_saga_begins', {
+            type: 'NativeFunction',
+            call: (args) => {
+                const [funcName, ...funcArgs] = args;
+                console.log(`[SAGA] Starting saga for: ${funcName}`);
+                const func = this.globalScope.get(funcName);
+                if (!func) {
+                    throw new Error(`Function '${funcName}' not found for the_saga_begins.`);
+                }
+                const sagaPromise = this.callFunction(func, funcArgs, this.globalScope)
+                    .catch(e => console.error(`[SAGA] Error in background saga '${funcName}':`, e));
+                
+                this.activeSagas.push(sagaPromise);
+                console.log(`[SAGA] Active sagas: ${this.activeSagas.length}`);
+                return this.activeSagas.length;
+            }
+        });
+
+        this.globalScope.set('wait_for_the_saga_to_end', {
+            type: 'NativeFunction',
+            call: async () => {
+                console.log(`[SAGA] Waiting for ${this.activeSagas.length} sagas to finish...`);
+                await Promise.all(this.activeSagas);
+                console.log("[SAGA] All sagas have finished.");
+                this.activeSagas = []; // Clear for next batch
+                return null;
+            }
+        });
+
+        this.globalScope.set('flesh_eating_weasels', {
+            type: 'NativeFunction',
+            call: async (args) => {
+                const prompt = args[0] || '';
+
+                // IDE/Electron environment
+                if (this.inputProvider) {
+                    return this.inputProvider(prompt);
+                }
+
+                // CLI (Node.js) environment
+                if (!readline) {
+                    this.log("FATAL WORD CRIME: CLI input is not supported in this environment.");
+                    return "";
+                }
+
+                const rl = readline.createInterface({
+                    input: process.stdin,
+                    output: process.stdout
+                });
+
+                return new Promise(resolve => {
+                    rl.question(prompt, (answer) => {
+                        rl.close();
+                        resolve(answer);
+                    });
+                });
+            }
+        });
+
+        // This is the core of the fix.
+        // If we were given a special set of functions (the "overrides"), we use them.
+        if (Object.keys(this.libraryOverrides).length > 0) {
+            for (const [name, func] of Object.entries(this.libraryOverrides)) {
+                this.globalScope.set(name, { type: 'NativeFunction', call: func });
+            }
+        } else {
+            // Otherwise, we behave as normal for the IDE and non-Electron CLI.
+            this.loadMath(this.globalScope);
+        }
+        return this.globalScope;
     }
 
     lexer(code) {
@@ -65,8 +184,11 @@ export class YankoviCInterpreter {
             [/^\s+/, null], 
             [/^\/\/.*/, null], 
             [/\/\*[\s\S]*?\*\//, null],
-            [/^#eat\s*(<.*?>|".*?"|[a-zA-Z_][a-zA-Z0-9_]*\.hat)/, 'DIRECTIVE'], 
+            // Updated: match #eat <...>, #eat "...", #eat something.hat, #eat something.yc, with flexible whitespace and optional trailing comments
+            [/^#eat\s+(<\s*[^>]+\s*>|"\s*[^\"]+\s*"|[.\/a-zA-Z0-9_\-]+\.(?:hat|yc))(\s*\/\/.*)?/, 'DIRECTIVE'], 
             [/^lunchbox/, 'LUNCHBOX_KEYWORD'],
+            [/^dare_to_be_stupid/, 'TRY_KEYWORD'],
+            [/^put_down_the_chainsaw/, 'CATCH_KEYWORD'],
             [/^on_the_menu|^private_stash/, 'VISIBILITY_KEYWORD'],
             [/^spatula|^lasagna|^lyric|^verse|^horoscope|^accordion_solo/, 'TYPE_KEYWORD'],
             [/^jeopardy|^another_one|^polka|^hardware_store/, 'CONTROL_KEYWORD'],
@@ -111,205 +233,158 @@ export class YankoviCInterpreter {
         throw new Error(`Parse Error: Expected ${type} ('${value || 'any'}') but got ${token.type} ('${token.value}')`);
     }
 
-        // --- All parsing functions ---
     parseProgram() {
         const program = { type: 'Program', body: [] };
-        console.log('[YankoviC Parser] Starting parseProgram, total tokens:', this.tokens.length);
         // Allow comments and #eat directives anywhere before the first function/lunchbox
         while (this.currentToken().type !== 'EOF') {
-            const currentToken = this.currentToken();
-            console.log('[YankoviC Parser] Processing token at position', this.pos, ':', JSON.stringify(currentToken));
-            
-            // Accept #eat directives and empty statements (comments/whitespace)
-            if (currentToken.type === 'DIRECTIVE' || currentToken.type === 'EmptyStatement') {
-                console.log('[YankoviC Parser] Parsing directive/empty statement');
-                program.body.push(this.parseTopLevelDeclaration());
-                continue;
-            }
-            // Accept function or lunchbox declarations
-            if (currentToken.type === 'LUNCHBOX_KEYWORD' || currentToken.type === 'TYPE_KEYWORD' || currentToken.type === 'VISIBILITY_KEYWORD') {
-                console.log('[YankoviC Parser] Parsing function/lunchbox declaration');
-                program.body.push(this.parseTopLevelDeclaration());
-                continue;
-            }
-            // Check if this is a user-defined lunchbox type used as a return type
-            if (currentToken.type === 'IDENTIFIER' && this.declaredLunchboxTypes.has(currentToken.value)) {
-                console.log('[YankoviC Parser] Parsing function declaration with user-defined return type:', currentToken.value);
-                program.body.push(this.parseTopLevelDeclaration());
-                continue;
-            }
-            // Accept stray semicolons (from comments/whitespace)
-            if (currentToken.value === ';') {
-                console.log('[YankoviC Parser] Skipping semicolon');
-                this.pos++;
-                continue;
-            }
-            // If we see anything else, error
-            console.error('[YankoviC Parser] UNEXPECTED TOKEN at top level:', JSON.stringify(currentToken));
-            console.error('[YankoviC Parser] Position:', this.pos, 'of', this.tokens.length);
-            console.error('[YankoviC Parser] Previous 3 tokens:', this.tokens.slice(Math.max(0, this.pos - 3), this.pos));
-            console.error('[YankoviC Parser] Next 3 tokens:', this.tokens.slice(this.pos + 1, this.pos + 4));
-            console.error('[YankoviC Parser] Declared lunchbox types:', Array.from(this.declaredLunchboxTypes));
-            throw new Error(`Parse Error: Only function, lunchbox, #eat, or comments are allowed at the top level. [Token: ${JSON.stringify(currentToken)}]`);
+            program.body.push(this.parseTopLevelDeclaration());
         }
-        console.log('[YankoviC Parser] parseProgram completed, body length:', program.body.length);
         return program;
     }
 
     parseTopLevelDeclaration() {
-        const token = this.currentToken();
-        console.log('[YankoviC Parser] parseTopLevelDeclaration, current token:', JSON.stringify(token));
-        
-        if (token.type === 'DIRECTIVE') { 
-            console.log('[YankoviC Parser] Processing directive:', token.value);
-            this.pos++; 
-            return { type: 'Directive', value: token.value }; 
-        }
-        if (token.type === 'LUNCHBOX_KEYWORD') {
-            console.log('[YankoviC Parser] Processing lunchbox declaration');
+        const current = this.currentToken();
+        if (current.type === 'DIRECTIVE') {
+            return this.parseDirective();
+        } else if (current.type === 'TYPE_KEYWORD' || this.peekToken().type === 'TYPE_KEYWORD') {
+            return this.parseFunctionDeclaration();
+        } else if (current.type === 'LUNCHBOX_KEYWORD' || this.peekToken().type === 'LUNCHBOX_KEYWORD') {
             return this.parseLunchboxDeclaration();
+        } else {
+            return this.parseStatement();
         }
-        if (token.type === 'TYPE_KEYWORD') {
-            console.log('[YankoviC Parser] Processing function declaration with return type');
-            return this.parseFunctionDeclaration();
-        }
-        if (token.type === 'VISIBILITY_KEYWORD') {
-            console.log('[YankoviC Parser] Processing function declaration with visibility');
-            return this.parseFunctionDeclaration();
-        }
-        // Check if this is a user-defined lunchbox type used as a return type
-        if (token.type === 'IDENTIFIER' && this.declaredLunchboxTypes.has(token.value)) {
-            console.log('[YankoviC Parser] Processing function declaration with user-defined return type:', token.value);
-            return this.parseFunctionDeclaration();
-        }
-        if (token.value === ';') { 
-            console.log('[YankoviC Parser] Processing empty statement (semicolon)');
-            this.pos++; 
-            return { type: 'EmptyStatement' }; 
-        }
-        
-        console.error('[YankoviC Parser] UNHANDLED TOKEN in parseTopLevelDeclaration:', JSON.stringify(token));
-        console.error('[YankoviC Parser] Token position:', this.pos, 'of', this.tokens.length);
-        console.error('[YankoviC Parser] Surrounding tokens:', this.tokens.slice(Math.max(0, this.pos - 2), this.pos + 3));
-        console.error('[YankoviC Parser] Declared lunchbox types:', Array.from(this.declaredLunchboxTypes));
-        throw new Error(`Parse Error: Only function or lunchbox declarations are allowed at the top level. [Token: ${JSON.stringify(token)}]`);
     }
 
-    parseLunchboxDeclaration() {
-        this.consume('LUNCHBOX_KEYWORD', 'lunchbox');
-        const name = this.consume('IDENTIFIER').value;
-        
-        // Track this lunchbox type for future function declarations
-        this.declaredLunchboxTypes.add(name);
-        console.log('[YankoviC Parser] Registered lunchbox type:', name);
-        
-        this.consume('PUNCTUATION', '{');
-        const fields = [];
-        while(this.currentToken().value !== '}') {
-            const fieldType = this.consume('TYPE_KEYWORD').value;
-            const fieldName = this.consume('IDENTIFIER').value;
-            fields.push({ name: fieldName, type: fieldType });
-            this.consume('PUNCTUATION', ';');
-        }
-        this.consume('PUNCTUATION', '}');
-        if (this.currentToken().value === ';') this.consume('PUNCTUATION', ';');
-        return { type: 'LunchboxDeclaration', name, fields };
+    parseDirective() {
+        const directive = this.consume('DIRECTIVE');
+        return { type: 'Directive', value: directive.value };
     }
-
-    parseStatement() {
-        const token = this.currentToken();
-        if (token.type === 'CONST_KEYWORD' || token.type === 'TYPE_KEYWORD') return this.parseVariableDeclaration();
-        if (token.type === 'IDENTIFIER') {
-            if (this.peekToken()?.type === 'IDENTIFIER') return this.parseVariableDeclaration();
-            return this.parseExpressionStatement();
-        }
-        if (token.type === 'RETURN_KEYWORD') return this.parseReturnStatement();
-        if (token.value === 'jeopardy') return this.parseIfStatement();
-        if (token.value === 'hardware_store') return this.parseHardwareStoreStatement();
-        if (token.value === 'polka') return this.parsePolkaStatement();
-        if (token.value === '{') return this.parseBlock();
-        throw new Error(`Parse Error: Unexpected token at start of statement: '${token.value}'`);
-    }
-    
-    parseStatementOrBlock() { if (this.currentToken().value === '{') return this.parseBlock(); return this.parseStatement(); }
 
     parseFunctionDeclaration() {
-        let visibility = 'public';
+        let visibility = 'on_the_menu'; // Default visibility
         if (this.currentToken().type === 'VISIBILITY_KEYWORD') {
-            visibility = this.consume('VISIBILITY_KEYWORD').value === 'on_the_menu' ? 'public' : 'private';
+            visibility = this.consume('VISIBILITY_KEYWORD').value;
         }
-        
-        // The return type can be either a TYPE_KEYWORD or a user-defined lunchbox type (IDENTIFIER)
-        let returnType;
-        const currentToken = this.currentToken();
-        if (currentToken.type === 'TYPE_KEYWORD') {
-            returnType = this.consume('TYPE_KEYWORD').value;
-        } else if (currentToken.type === 'IDENTIFIER' && this.declaredLunchboxTypes.has(currentToken.value)) {
-            returnType = this.consume('IDENTIFIER').value;
-            console.log('[YankoviC Parser] Using user-defined return type:', returnType);
-        } else {
-            throw new Error(`Parse Error: Expected return type (built-in or user-defined), got ${currentToken.type}: ${currentToken.value}`);
-        }
-        
-        const name = this.consume('IDENTIFIER').value;
+        const returnType = this.consume('TYPE_KEYWORD');
+        const name = this.consume('IDENTIFIER');
         this.consume('PUNCTUATION', '(');
         const params = [];
-        if (this.currentToken().value !== ')') {
-            do {
-                if(this.currentToken().value === ',') this.consume('PUNCTUATION', ',');
-                const paramTypeToken = this.consume(this.currentToken().type === 'TYPE_KEYWORD' ? 'TYPE_KEYWORD' : 'IDENTIFIER');
-                const paramName = this.consume('IDENTIFIER').value;
-                params.push({ type: 'Parameter', name: paramName, varType: paramTypeToken.value });
-            } while (this.currentToken().value === ',');
+        while (this.currentToken().value !== ')') {
+            const paramVis = this.currentToken().type === 'VISIBILITY_KEYWORD' ? this.consume('VISIBILITY_KEYWORD').value : 'private_stash';
+            const paramType = this.consume('TYPE_KEYWORD');
+            const paramName = this.consume('IDENTIFIER');
+            params.push({ visibility: paramVis, type: paramType.value, name: paramName.value });
+            if (this.currentToken().value === ',') this.consume('PUNCTUATION', ',');
         }
         this.consume('PUNCTUATION', ')');
         const body = this.parseBlock();
-        return { type: 'FunctionDeclaration', name, returnType, params, body, visibility };
+        return { type: 'FunctionDeclaration', visibility, returnType: returnType.value, name: name.value, params, body };
     }
-    
-    parseBlock() {
-        const block = { type: 'BlockStatement', body: [] };
+
+    parseLunchboxDeclaration() {
+        let visibility = 'on_the_menu'; // Default visibility
+        if (this.currentToken().type === 'VISIBILITY_KEYWORD') {
+            visibility = this.consume('VISIBILITY_KEYWORD').value;
+        }
+        this.consume('LUNCHBOX_KEYWORD');
+        const name = this.consume('IDENTIFIER').value;
         this.consume('PUNCTUATION', '{');
+        const members = [];
         while (this.currentToken().value !== '}') {
-            block.body.push(this.parseStatement());
+            const memberVis = this.currentToken().type === 'VISIBILITY_KEYWORD' ? this.consume('VISIBILITY_KEYWORD').value : 'private_stash';
+            const memberType = this.consume('TYPE_KEYWORD').value;
+            const memberName = this.consume('IDENTIFIER').value;
+            this.consume('PUNCTUATION', ';');
+            members.push({ visibility: memberVis, type: memberType, name: memberName });
         }
         this.consume('PUNCTUATION', '}');
-        return block;
+        return { type: 'LunchboxDeclaration', visibility, name, members };
     }
 
-    parseVariableDeclaration(isForLoopInit = false) {
-        let isStupid = false;
-        if (this.currentToken().type === 'CONST_KEYWORD') { isStupid = true; this.consume('CONST_KEYWORD'); }
-        const varTypeToken = this.consume(this.currentToken().type === 'TYPE_KEYWORD' ? 'TYPE_KEYWORD' : 'IDENTIFIER');
-        const id = this.consume('IDENTIFIER').value;
-        let init = null;
-        if(this.currentToken().value === '=') { this.consume('OPERATOR', '='); init = this.parseExpression(); }
-        if (!isForLoopInit) this.consume('PUNCTUATION', ';');
-        return { type: 'VariableDeclaration', id, varType: varTypeToken.value, init, isStupid };
+    parseTryCatchStatement() {
+        this.consume('TRY_KEYWORD');
+        const tryBlock = this.parseBlock();
+        let catchParam = null;
+        let catchBlock = null;
+        if (this.currentToken().value === 'put_down_the_chainsaw') {
+            this.consume('CATCH_KEYWORD');
+            this.consume('PUNCTUATION', '(');
+            catchParam = this.parseIdentifier();
+            this.consume('PUNCTUATION', ')');
+            catchBlock = this.parseBlock();
+        }
+        return { type: 'TryCatchStatement', tryBlock, catchParam, catchBlock };
     }
 
-    parseHardwareStoreStatement() {
-        this.consume('CONTROL_KEYWORD', 'hardware_store');
+    parseBlock() {
+        this.consume('PUNCTUATION', '{');
+        const body = [];
+        while (this.currentToken().value !== '}') {
+            body.push(this.parseStatement());
+        }
+        this.consume('PUNCTUATION', '}');
+        return { type: 'BlockStatement', body };
+    }
+
+    parseStatement() {
+        const current = this.currentToken();
+        switch (current.type) {
+            case 'CONTROL_KEYWORD':
+                switch (current.value) {
+                    case 'jeopardy':
+                        return this.parseIfStatement();
+                    case 'polka':
+                        return this.parseWhileStatement();
+                    case 'hardware_store':
+                        return this.parseForStatement();
+                }
+            case 'RETURN_KEYWORD':
+                return this.parseReturnStatement();
+            case 'TYPE_KEYWORD':
+            case 'CONST_KEYWORD':
+                return this.parseVariableDeclaration();
+            case 'LUNCHBOX_KEYWORD':
+                return this.parseLunchboxDeclaration();
+            case 'TRY_KEYWORD':
+                return this.parseTryCatchStatement();
+            default:
+                return this.parseExpressionStatement();
+        }
+    }
+
+    parseIfStatement() {
+        this.consume('CONTROL_KEYWORD', 'jeopardy');
         this.consume('PUNCTUATION', '(');
-        let init = null;
-        if (this.currentToken().value !== ';') { init = this.parseVariableDeclaration(true); } else { this.consume('PUNCTUATION', ';'); }
-        let test = null;
-        if (this.currentToken().value !== ';') { test = this.parseExpression(); }
-        this.consume('PUNCTUATION', ';');
-        let update = null;
-        if (this.currentToken().value !== ')') { update = this.parseExpression(); }
+        const test = this.parseExpression();
         this.consume('PUNCTUATION', ')');
-        const body = this.parseStatementOrBlock();
-        return { type: 'HardwareStoreStatement', init, test, update, body };
+        const consequent = this.parseBlock();
+        let alternate = null;
+        if (this.currentToken().value === 'another_one') {
+            this.consume('CONTROL_KEYWORD', 'another_one');
+            alternate = this.parseBlock();
+        }
+        return { type: 'IfStatement', test, consequent, alternate };
     }
-    
-    parsePolkaStatement() {
+
+    parseWhileStatement() {
         this.consume('CONTROL_KEYWORD', 'polka');
         this.consume('PUNCTUATION', '(');
         const test = this.parseExpression();
         this.consume('PUNCTUATION', ')');
-        const body = this.parseStatementOrBlock();
-        return { type: 'PolkaStatement', test, body };
+        const body = this.parseBlock();
+        return { type: 'WhileStatement', test, body };
+    }
+
+    parseForStatement() {
+        this.consume('CONTROL_KEYWORD', 'hardware_store');
+        this.consume('PUNCTUATION', '(');
+        const init = this.parseVariableDeclaration();
+        const test = this.parseExpression();
+        this.consume('PUNCTUATION', ';');
+        const update = this.parseExpression();
+        this.consume('PUNCTUATION', ')');
+        const body = this.parseBlock();
+        return { type: 'ForStatement', init, test, update, body };
     }
 
     parseReturnStatement() {
@@ -319,308 +394,299 @@ export class YankoviCInterpreter {
         return { type: 'ReturnStatement', argument };
     }
 
-    parseIfStatement() {
-        this.consume('CONTROL_KEYWORD', 'jeopardy');
-        this.consume('PUNCTUATION', '(');
-        const test = this.parseExpression();
-        this.consume('PUNCTUATION', ')');
-        const consequent = this.parseStatementOrBlock();
-        let alternate = null;
-        if (this.currentToken().value === 'another_one') { this.consume('CONTROL_KEYWORD'); alternate = this.parseStatementOrBlock(); }
-        return { type: 'IfStatement', test, consequent, alternate };
+    parseVariableDeclaration() {
+        let isConst = false;
+        if (this.currentToken().type === 'CONST_KEYWORD') {
+            this.consume('CONST_KEYWORD');
+            isConst = true;
+        }
+        const type = this.consume('TYPE_KEYWORD').value;
+        const name = this.consume('IDENTIFIER').value;
+        let init = null;
+        if (this.currentToken().value === '=') {
+            this.consume('OPERATOR', '=');
+            init = this.parseExpression();
+        }
+        this.consume('PUNCTUATION', ';');
+        return { type: 'VariableDeclaration', kind: type, name, init, isConst };
     }
 
     parseExpressionStatement() {
-        const expression = this.parseExpression();
+        const expr = this.parseExpression();
         this.consume('PUNCTUATION', ';');
-        return { type: 'ExpressionStatement', expression };
+        return { type: 'ExpressionStatement', expression: expr };
     }
 
-    parseExpression() { return this.parseAssignmentExpression(); }
-    
+    parseExpression() {
+        return this.parseAssignmentExpression();
+    }
+
     parseAssignmentExpression() {
-        const left = this.parseBinaryExpression();
-        if (this.currentToken().value === '=') {
-            this.consume('OPERATOR');
+        let left = this.parseLogicalExpression();
+        if (this.currentToken().type === 'OPERATOR' && this.currentToken().value === '=') {
+            this.consume('OPERATOR', '=');
             const right = this.parseAssignmentExpression();
-            if (left.type !== 'Identifier' && left.type !== 'MemberExpression') throw new Error("Parse Error: Invalid assignment target.");
-            return { type: 'AssignmentExpression', left, right };
+            return { type: 'AssignmentExpression', operator: '=', left, right };
         }
         return left;
     }
 
-    parseBinaryExpression(precedence = 0) {
-        let expr = this.parseUnaryExpression();
-        while (true) {
-            const opToken = this.currentToken();
-            if (opToken.type !== 'OPERATOR' || this.getOperatorPrecedence(opToken.value) <= precedence) break;
-            const currentPrecedence = this.getOperatorPrecedence(opToken.value);
-            this.consume('OPERATOR');
-            const right = this.parseBinaryExpression(currentPrecedence);
-            expr = { type: 'BinaryExpression', operator: opToken.value, left: expr, right };
+    parseLogicalExpression() {
+        let left = this.parseEqualityExpression();
+        while (this.currentToken().type === 'OPERATOR' && ['&&', '||'].includes(this.currentToken().value)) {
+            const operator = this.consume('OPERATOR').value;
+            const right = this.parseEqualityExpression();
+            left = { type: 'LogicalExpression', operator, left, right };
         }
-        return expr;
+        return left;
     }
-    
-    parseUnaryExpression() {
-        if (this.currentToken().value === '!' || this.currentToken().value === '-') {
+
+    parseEqualityExpression() {
+        let left = this.parseRelationalExpression();
+        while (this.currentToken().type === 'OPERATOR' && ['==', '!='].includes(this.currentToken().value)) {
+            const operator = this.consume('OPERATOR').value;
+            const right = this.parseRelationalExpression();
+            left = { type: 'BinaryExpression', operator, left, right };
+        }
+        return left;
+    }
+
+    parseRelationalExpression() {
+        let left = this.parseAdditiveExpression();
+        while (this.currentToken().type === 'OPERATOR' && ['<', '>', '<=', '>='].includes(this.currentToken().value)) {
+            const operator = this.consume('OPERATOR').value;
+            const right = this.parseAdditiveExpression();
+            left = { type: 'BinaryExpression', operator, left, right };
+        }
+        return left;
+    }
+
+    parseAdditiveExpression() {
+        let left = this.parseMultiplicativeExpression();
+        while (this.currentToken().type === 'OPERATOR' && ['+', '-'].includes(this.currentToken().value)) {
+            const operator = this.consume('OPERATOR').value;
+            const right = this.parseMultiplicativeExpression();
+            left = { type: 'BinaryExpression', operator, left, right };
+        }
+        return left;
+    }
+
+    parseMultiplicativeExpression() {
+        let left = this.parseUnaryExpression();
+        while (this.currentToken().type === 'OPERATOR' && ['*', '/', '%'].includes(this.currentToken().value)) {
             const operator = this.consume('OPERATOR').value;
             const right = this.parseUnaryExpression();
-            return { type: 'UnaryExpression', operator, right };
+            left = { type: 'BinaryExpression', operator, left, right };
         }
-        return this.parseMemberAccessExpression();
+        return left;
     }
 
-    getOperatorPrecedence(op) {
-        switch(op) {
-            case '||': return 1; case '&&': return 2;
-            case '==': case '!=': return 3;
-            case '<': case '>': case '<=': case '>=': return 4;
-            case '+': case '-': return 5;
-            case '*': case '/': return 6;
-            default: return 0;
+    parseUnaryExpression() {
+        if (this.currentToken().type === 'OPERATOR' && ['!', '-', '+'].includes(this.currentToken().value)) {
+            const operator = this.consume('OPERATOR').value;
+            const argument = this.parseUnaryExpression();
+            return { type: 'UnaryExpression', operator, argument };
+        }
+        return this.parsePrimaryExpression();
+    }
+
+    parsePrimaryExpression() {
+        const current = this.currentToken();
+        switch (current.type) {
+            case 'NUMBER':
+                return { type: 'Literal', value: Number(this.consume('NUMBER').value) };
+            case 'STRING':
+                return { type: 'Literal', value: this.consume('STRING').value };
+            case 'BOOLEAN':
+                return { type: 'Literal', value: current.value === 'its_a_fact' };
+            case 'IDENTIFIER':
+                return this.parseIdentifierExpression();
+            case 'PUNCTUATION':
+                if (current.value === '(') {
+                    this.consume('PUNCTUATION', '(');
+                    const expr = this.parseExpression();
+                    this.consume('PUNCTUATION', ')');
+                    return expr;
+                }
+            default:
+                throw new Error(`Unexpected token in primary expression: ${current.type}`);
         }
     }
 
-    parseMemberAccessExpression() {
-        let expr = this.parsePrimary();
-        while(this.currentToken().type === 'DOT') {
-            this.consume('DOT');
-            const property = this.consume('IDENTIFIER');
-            expr = { type: 'MemberExpression', object: expr, property: { type: 'Identifier', name: property.value } };
+    parseIdentifierExpression() {
+        const id = this.parseIdentifier();
+        if (this.currentToken().value === '(') {
+            return this.parseCallExpression(id);
         }
-        return expr;
+        return id;
     }
 
-    parsePrimary() {
-        const token = this.currentToken();
-        if (token.type === 'NUMBER') { this.pos++; return { type: 'Literal', value: parseFloat(token.value) }; }
-        if (token.type === 'STRING') { this.pos++; return { type: 'Literal', value: token.value }; }
-        if (token.type === 'BOOLEAN') { this.pos++; return { type: 'Literal', value: token.value === 'its_a_fact' }; }
-        if (token.type === 'IDENTIFIER') {
-            if (this.peekToken()?.value === '(') return this.parseCallExpression();
-            this.pos++; return { type: 'Identifier', name: token.value };
-        }
-        if (token.value === '(') { this.consume('PUNCTUATION', '('); const expr = this.parseExpression(); this.consume('PUNCTUATION', ')'); return expr; }
-        throw new Error(`Parse Error: Unexpected token ${token.type} ('${token.value}')`);
-    }
-
-    parseCallExpression() {
-        const callee = this.consume('IDENTIFIER').value;
+    parseCallExpression(callee) {
         this.consume('PUNCTUATION', '(');
         const args = [];
-        if (this.currentToken().value !== ')') {
-             do {
-                if(this.currentToken().value === ',') this.consume('PUNCTUATION', ',');
-                args.push(this.parseExpression());
-            } while (this.currentToken().value === ',');
+        while (this.currentToken().value !== ')') {
+            args.push(this.parseExpression());
+            if (this.currentToken().value === ',') this.consume('PUNCTUATION', ',');
         }
         this.consume('PUNCTUATION', ')');
-        return { type: 'CallExpression', callee, args };
+        return { type: 'CallExpression', callee, arguments: args };
     }
-    
-    async createGlobalScope() {
-        const scope = new Scope();
-        scope.define('perform_a_parody', {
-            type: 'NativeFunction',
-            call: (args) => {
-                let formatString = String(args[0] || '');
-                let argIndex = 1;
-                const result = formatString.replace(/%verse|%spatula|%horoscope/g, (match) => {
-                    const val = args[argIndex++];
-                    return val === true ? 'its_a_fact' : val === false ? 'total_baloney' : String(val);
-                });
-                this.log(result);
-                // Print directly to terminal if running in Node.js (CLI)
-                if (typeof process !== 'undefined' && process.stdout && typeof process.stdout.write === 'function') {
-                    process.stdout.write(result + '\n');
-                }
-            }
-        });
 
-        // This is the core of the fix.
-        // If we were given a special set of functions (the "overrides"), we use them.
-        if (Object.keys(this.libraryOverrides).length > 0) {
-            for (const [name, func] of Object.entries(this.libraryOverrides)) {
-                scope.define(name, { type: 'NativeFunction', call: func });
-            }
-        } else {
-            // Otherwise, we behave as normal for the IDE and non-Electron CLI.
-            this.loadMath(scope);
-        }
-        return scope;
+    parseIdentifier() {
+        const token = this.consume('IDENTIFIER');
+        return { type: 'Identifier', name: token.value };
     }
 
     async interpret(node, scope) {
-         if (!node) return;
-         switch (node.type) {
+        switch (node.type) {
             case 'Program':
                 for (const statement of node.body) {
-                    // ---> CORRECTED: Check for API client before processing imports
-                    if (statement.type === 'Directive' && typeof window !== 'undefined' && getFileContent) {
-                        await this.processImport(statement, scope);
-                    } else if (statement.type === 'FunctionDeclaration' || statement.type === 'LunchboxDeclaration') {
-                        await this.interpret(statement, scope);
-                    }
+                    await this.interpret(statement, scope);
                 }
-                const mainFn = scope.get('want_a_new_duck');
-                if (!mainFn) throw new Error("Program does not contain a 'want_a_new_duck' function.");
-                await this.callFunction(mainFn, [], scope);
-                return;
-            
-            case 'Directive': return; // Imports handled above or by pre-processor
-            case 'EmptyStatement': return;
-
-            case 'LunchboxDeclaration':
-                scope.define(node.name, { type: 'LunchboxDefinition', name: node.name, fields: node.fields });
-                return;
-            
-            case 'FunctionDeclaration': 
-                const funcDef = { type: 'Function', name: node.name, params: node.params, body: node.body, closure: scope, visibility: node.visibility || 'public' };
-                scope.define(node.name, funcDef); 
-                return;
-            case 'BlockStatement': 
-                const blockScope = new Scope(scope);
-                for (const statement of node.body) {
-                    await this.interpret(statement, blockScope);
-                    if (this.polkaLoop && !this.isRunningFrame) return;
-                }
-                return;
-            case 'HardwareStoreStatement':
-                const loopScope = new Scope(scope);
-                if (node.init) await this.interpret(node.init, loopScope);
-                while (true) {
-                    if (this.polkaLoop) return;
-                    let testResult = true;
-                    if (node.test) testResult = await this.interpret(node.test, loopScope);
-                    if (!testResult) break;
-                    await this.interpret(node.body, loopScope);
-                    if (this.polkaLoop) return;
-                    if (node.update) await this.interpret(node.update, loopScope);
-                }
-                return;
-            case 'PolkaStatement':
-                this.polkaLoop = {
-                    test: node.test,
+                break;
+            case 'Directive':
+                await this.processImport(node, scope);
+                break;
+            case 'FunctionDeclaration':
+                scope.set(node.name, {
+                    type: 'Function',
+                    params: node.params,
                     body: node.body,
-                    scope: new Scope(scope)
+                    closure: scope
+                });
+                break;
+            case 'LunchboxDeclaration':
+                const lunchboxType = {
+                    type: 'LunchboxType',
+                    members: node.members.reduce((acc, m) => {
+                        acc[m.name] = { type: m.type, visibility: m.visibility };
+                        return acc;
+                    }, {})
                 };
-                this.log("Polka loop initialized and ready for frame-based execution.");
-                return;
-            
-            case 'VariableDeclaration':
-                let value = node.init ? await this.interpret(node.init, scope) : undefined;
-                
-                const primitiveTypes = ['spatula', 'lasagna', 'lyric', 'verse', 'horoscope', 'accordion_solo'];
-                if (!primitiveTypes.includes(node.varType)) {
-                    const typeDef = scope.get(node.varType);
-                    if (typeDef && typeDef.type === 'LunchboxDefinition') {
-                        value = {}; // Instantiate a lunchbox
+                scope.set(node.name, lunchboxType);
+                break;
+            case 'TryCatchStatement':
+                try {
+                    await this.interpret(node.tryBlock, scope);
+                } catch (error) {
+                    if (node.catchBlock) {
+                        const catchScope = new Scope(scope);
+                        catchScope.set(node.catchParam.name, error.message); // Pass error message as string
+                        await this.interpret(node.catchBlock, catchScope);
                     } else {
-                        throw new Error(`Runtime Error: Unknown type '${node.varType}'.`);
+                        throw error;
                     }
                 }
-                
-                scope.define(node.id, value, node.isStupid);
-                return;
-
-            case 'ExpressionStatement': await this.interpret(node.expression, scope); return;
-            case 'IfStatement': if (await this.interpret(node.test, scope)) { await this.interpret(node.consequent, scope); } else if (node.alternate) { await this.interpret(node.alternate, scope); } return;
-            case 'ReturnStatement': throw { isReturnValue: true, value: await this.interpret(node.argument, scope) };
+                break;
+            case 'BlockStatement':
+                const blockScope = new Scope(scope);
+                for (const stmt of node.body) {
+                    await this.interpret(stmt, blockScope);
+                }
+                break;
+            case 'IfStatement':
+                const testValue = await this.interpret(node.test, scope);
+                if (testValue) {
+                    await this.interpret(node.consequent, scope);
+                } else if (node.alternate) {
+                    await this.interpret(node.alternate, scope);
+                }
+                break;
+            case 'WhileStatement':
+                while (await this.interpret(node.test, scope)) {
+                    await this.interpret(node.body, scope);
+                }
+                break;
+            case 'ForStatement':
+                const forScope = new Scope(scope);
+                await this.interpret(node.init, forScope);
+                while (await this.interpret(node.test, forScope)) {
+                    await this.interpret(node.body, forScope);
+                    await this.interpret(node.update, forScope);
+                }
+                break;
+            case 'ReturnStatement':
+                const returnValue = await this.interpret(node.argument, scope);
+                const error = new Error('Return');
+                error.isReturnValue = true;
+                error.value = returnValue;
+                throw error;
+            case 'VariableDeclaration':
+                const initValue = node.init ? await this.interpret(node.init, scope) : undefined;
+                scope.set(node.name, initValue, node.isConst);
+                break;
+            case 'ExpressionStatement':
+                await this.interpret(node.expression, scope);
+                break;
             case 'AssignmentExpression':
-                 const valueToAssign = await this.interpret(node.right, scope);
-                 if (node.left.type === 'Identifier') { scope.assign(node.left.name, valueToAssign); }
-                 else if (node.left.type === 'MemberExpression') {
-                     const targetObject = await this.interpret(node.left.object, scope);
-                     if (typeof targetObject !== 'object' || targetObject === null) throw new Error(`Runtime Error: Cannot assign to property of a non-lunchbox value.`);
-                     targetObject[node.left.property.name] = valueToAssign;
-                 }
-                 return valueToAssign;
-            case 'UnaryExpression':
-                const rightUnary = await this.interpret(node.right, scope);
-                switch(node.operator) {
-                    case '!': return !rightUnary;
-                    case '-': return -rightUnary;
-                }
-                return;
+                const left = node.left;
+                if (left.type !== 'Identifier') throw new Error('Invalid assignment target');
+                const value = await this.interpret(node.right, scope);
+                scope.assign(left.name, value);
+                break;
             case 'BinaryExpression':
-                const left = await this.interpret(node.left, scope);
-                if (node.operator === '||') return left || await this.interpret(node.right, scope);
-                if (node.operator === '&&') return left && await this.interpret(node.right, scope);
-                const right = await this.interpret(node.right, scope);
+            case 'LogicalExpression':
+                const leftVal = await this.interpret(node.left, scope);
+                const rightVal = await this.interpret(node.right, scope);
                 switch (node.operator) {
-                    case '+': return left + right; case '-': return left - right; case '*': return left * right; case '/': return left / right; case '%': return left % right;
-                    case '==': return left === right; case '!=': return left !== right;
-                    case '<': return left < right; case '>': return left > right; case '<=': return left <= right; case '>=': return left >= right;
+                    case '+': return leftVal + rightVal;
+                    case '-': return leftVal - rightVal;
+                    case '*': return leftVal * rightVal;
+                    case '/': return leftVal / rightVal;
+                    case '%': return leftVal % rightVal;
+                    case '==': return leftVal === rightVal;
+                    case '!=': return leftVal !== rightVal;
+                    case '<': return leftVal < rightVal;
+                    case '>': return leftVal > rightVal;
+                    case '<=': return leftVal <= rightVal;
+                    case '>=': return leftVal >= rightVal;
+                    case '&&': return leftVal && rightVal;
+                    case '||': return leftVal || rightVal;
+                    default: throw new Error(`Unknown operator: ${node.operator}`);
                 }
-                return;
-            case 'MemberExpression':
-                const object = await this.interpret(node.object, scope);
-                if (typeof object !== 'object' || object === null) throw new Error(`Runtime Error: Cannot access property '${node.property.name}' of a non-lunchbox value.`);
-                return object[node.property.name];
+            case 'UnaryExpression':
+                const arg = await this.interpret(node.argument, scope);
+                switch (node.operator) {
+                    case '!': return !arg;
+                    case '-': return -arg;
+                    case '+': return +arg;
+                    default: throw new Error(`Unknown unary operator: ${node.operator}`);
+                }
+            case 'Literal':
+                return node.value;
+            case 'Identifier':
+                return scope.get(node.name);
             case 'CallExpression':
-                const func = scope.get(node.callee);
-                if (!func || (typeof func.call !== 'function' && func.type !== 'Function')) throw new Error(`Runtime Error: '${node.callee}' is not a function.`);
+                const callee = await this.interpret(node.callee, scope);
                 const args = [];
-                for (const arg of node.args) {
+                for (const arg of node.arguments) {
                     args.push(await this.interpret(arg, scope));
                 }
-                return await this.callFunction(func, args, scope);
-            case 'Identifier': return scope.get(node.name);
-            case 'Literal': return node.value;
-            default: throw new Error(`Interpret Error: Unknown AST node type ${node.type}`);
+                return await this.callFunction(callee, args, scope);
+            default:
+                throw new Error(`Unknown node type: ${node.type}`);
         }
     }
 
-    
-    async callFunction(func, args, callingScope) {
+    async callFunction(func, args, scope) {
         if (func.type === 'NativeFunction') {
-            return await func.call.bind(this)(args); // Bind 'this' to access interpreter state
+            const boundCall = func.call.bind(this);
+            const result = boundCall(args);
+            return await Promise.resolve(result);
+        }
+        if (func.type !== 'Function') {
+            throw new Error(`'${func.name}' is not a function.`);
         }
         const functionScope = new Scope(func.closure);
         func.params.forEach((param, i) => {
-            functionScope.define(param.name, args[i]);
+            functionScope.set(param.name, args[i]);
         });
         try { await this.interpret(func.body, functionScope); }
         catch (e) { if (e.isReturnValue) return e.value; throw e; }
         return undefined; 
     }
 
-    async runFrame() {
-        if (!this.polkaLoop) return null;
-
-        this.frameCount++;
-        this.isRunningFrame = true;
-
-        try {
-            const testResult = await this.interpret(this.polkaLoop.test, this.polkaLoop.scope);
-            if (testResult) {
-                await this.interpret(this.polkaLoop.body, this.polkaLoop.scope);
-                this.isRunningFrame = false;
-                return this.drawCommandBuffer;
-            } else {
-                this.stopLoop();
-                this.isRunningFrame = false;
-                return null;
-            }
-        } catch (error) {
-            this.log(`FATAL WORD CRIME in loop: ${error.message}`);
-            this.stopLoop();
-            this.isRunningFrame = false;
-            return null;
-        }
-    }
-    
-    stopLoop() {
-        if (!this.polkaLoop) return;
-        if (typeof window !== 'undefined' && window.uhfAPI) {
-            window.uhfAPI.cancelTheShow();
-        }
-        this.polkaLoop = null;
-        this.showIsOver = true;
-    }
-
-    async run(code) {
+    async run(code, entryFilePath = null) {
         this.outputBuffer = [];
         this.pos = 0;
         this.polkaLoop = null;
@@ -628,14 +694,12 @@ export class YankoviCInterpreter {
         this.frameCount = 0;
         this.drawCommandBuffer = [];
         this.code = code;
+        this.currentFilePath = entryFilePath || null;
         let exitCode = 27;
-
         try {
             this.tokens = this.lexer(code);
-            this.globalScope = await this.createGlobalScope();
             const ast = this.parseProgram();
             await this.interpret(ast, this.globalScope);
-
             if (!this.polkaLoop) {
                  this.log("Program finished.");
             } else {
@@ -653,130 +717,38 @@ export class YankoviCInterpreter {
         return { output: this.outputBuffer.join('\n'), exitCode };
     }
 
-    
-    // --- NATIVE LIBRARY LOADERS ---
-    async loadUHF(scope) {
-        if (typeof window !== 'undefined' && window.uhfAPI) {
-            for (const [funcName, funcDef] of Object.entries(UHF_LIBRARY)) {
-                scope.define(funcName, funcDef);
-            }
+    // --- Universal, recursive import resolution ---
+    async processImport(directive, scope) {
+        // console.log('[YankoviC Import] Processing import directive:', directive.value);
+        if (Object.keys(this.libraryOverrides).length > 0) {
+            // console.log('[YankoviC Import] Skipping import in special execution context (library overrides present)');
             return;
         }
-        const uhfLib = {
-            start_the_show: { type: 'NativeFunction', call: args => { this.drawCommandBuffer.push({command:'start_show', args}); return 27; } },
-            cancel_the_show: { type: 'NativeFunction', call: () => { this.drawCommandBuffer.push({command:'cancel_show', args:[]}); this.showIsOver = true; } },
-            the_shows_over: { type: 'NativeFunction', call: () => this.showIsOver },
-            set_polka_speed: { type: 'NativeFunction', call: args => { this.frameRate = args[0]||60; } },
-            roll_the_camera: { type: 'NativeFunction', call: () => this.drawCommandBuffer = [] },
-            that_is_a_wrap: { type: 'NativeFunction', call: () => this.drawCommandBuffer.push({command:'render_frame', args:[]}) },
-            wait_for_a_moment: { type: 'NativeFunction', call: args => this.drawCommandBuffer.push({command:'wait', args:[args[0]||1000]}) },
-            paint_the_set: { type: 'NativeFunction', call: args => this.drawCommandBuffer.push({command:'paint_set', args:[args[0]||'BLACK']}) },
-            pick_a_hawaiian_shirt: { type: 'NativeFunction', call: args => this.drawCommandBuffer.push({command:'pick_shirt', args:[args[0]]}) },
-            draw_a_spamsicle: { type: 'NativeFunction', call: args => this.drawCommandBuffer.push({command:'draw_spamsicle', args}) },
-            draw_a_big_ol_wheel_of_cheese: { type: 'NativeFunction', call: args => this.drawCommandBuffer.push({command:'draw_cheese', args}) },
-            print_a_string_at: { type: 'NativeFunction', call: args => this.drawCommandBuffer.push({command:'print_string', args}) },
-            draw_a_button: { type: 'NativeFunction', call: args => this.drawCommandBuffer.push({command:'draw_button', args}) },
-            button_was_clicked: { type: 'NativeFunction', call: args => false },
-            draw_a_checkbox: { type: 'NativeFunction', call: args => this.drawCommandBuffer.push({command:'draw_checkbox', args}) },
-            get_checkbox_value: { type: 'NativeFunction', call: args => false },
-            draw_a_slider: { type: 'NativeFunction', call: args => this.drawCommandBuffer.push({command:'draw_slider', args}) },
-            get_slider_value: { type: 'NativeFunction', call: args => 0 },
-            mouse_was_clicked: { type: 'NativeFunction', call: () => false },
-            get_mouse_x: { type: 'NativeFunction', call: () => 0 },
-            get_mouse_y: { type: 'NativeFunction', call: () => 0 },
-            AL_RED: { type: 'Literal', value: { r: 237, g: 28,  b: 36,  a: 255 } },
-            WHITE_ZOMBIE: { type: 'Literal', value: { r: 240, g: 240, b: 240, a: 255 } },
-            BLACK_MAGIC: { type: 'Literal', value: { r: 16,  g: 16,  b: 16,  a: 255 } },
-            SPAM_GREEN: { type: 'Literal', value: { r: 0,   g: 255, b: 0,   a: 255 } },
-            TWINKIE_GOLD: { type: 'Literal', value: { r: 255, g: 242, b: 0,   a: 255 } },
-            ORANGE_CHEESE: { type: 'Literal', value: { r: 255, g: 127, b: 39,  a: 255 } },
-            SKY_BLUE_FOR_YOU: { type: 'Literal', value: { r: 135, g: 206, b: 235, a: 255 } },
-            SILVER_SPATULA: { type: 'Literal', value: { r: 200, g: 200, b: 200, a: 255 } }
-        };
-        for (const [name, def] of Object.entries(uhfLib)) {
-            scope.define(name, def);
-        }
-    }
-    
-    loadMath(scope) {
-        const mathLib = {
-            sin: { type: 'NativeFunction', call: (args) => Math.sin(args[0]) },
-            cos: { type: 'NativeFunction', call: (args) => Math.cos(args[0]) },
-            random_spatula: { type: 'NativeFunction', call: () => Math.floor(Math.random() * 100) },
-            yoda: { type: 'NativeFunction', call: (args) => args[0] % args[1] }
-        };
-        for(const func in mathLib) scope.define(func, mathLib[func]);
-    }
-
-    loadInput(scope) {
-        const inputLib = {
-            ask_the_audience: { 
-                type: 'NativeFunction', 
-                call: () => {
-                    if (typeof window !== 'undefined') {
-                        return prompt("Enter a value:") || "";
-                    } else {
-                        try {
-                            const readlineSync = require('readline-sync');
-                            return readlineSync.question("Enter a value: ");
-                        } catch (e) { console.log("Warning: readline-sync not available"); return ""; }
-                    }
-                }
-            },
-        };
-        for(const func in inputLib) scope.define(func, inputLib[func]);
-    }
-
-    loadLikeAServer(scope) {
-        // console.log('[Interpreter] Loading Like_a_Server library');
-        for (const [funcName, funcDef] of Object.entries(LIKE_A_SERVER_LIBRARY)) {
-            scope.define(funcName, funcDef);
-        }
-        // console.log('[Interpreter] Loaded', Object.keys(LIKE_A_SERVER_LIBRARY).length, 'Like_a_Server functions');
-    }
-
-    loadWeirdWideWeb(scope) {
-        // console.log('[Interpreter] Loading Weird_Wide_Web library');
-        for (const [funcName, funcDef] of Object.entries(WEIRD_WIDE_WEB_LIBRARY)) {
-            scope.define(funcName, funcDef);
-        }
-        // console.log('[Interpreter] Loaded', Object.keys(WEIRD_WIDE_WEB_LIBRARY).length, 'Weird_Wide_Web functions');
-    }
-
-    loadVirusAlert(scope) {
-        // console.log('[Interpreter] Loading Virus_Alert library');
-        for (const [funcName, funcDef] of Object.entries(VIRUS_ALERT_LIBRARY)) {
-            scope.define(funcName, funcDef);
-        }
-        // console.log('[Interpreter] Loaded', Object.keys(VIRUS_ALERT_LIBRARY).length, 'Virus_Alert functions');
-    }
-
-    async processImport(directive, scope) {
-        console.log('[YankoviC Import] Processing import directive:', directive.value);
-        
-        // --- THIS IS THE FIX ---
-        // If library overrides are present, we are in a special execution context
-        // (like the --electron CLI runner) where all necessary functions are already
-        // injected. In this case, we should IGNORE standard library imports because
-        // they have already been provided.
-        if (Object.keys(this.libraryOverrides).length > 0) {
-            console.log('[YankoviC Import] Skipping import in special execution context (library overrides present)');
-            return; 
-        }
-
-        // --- Original logic for IDE and non-electron CLI modes ---
+        // Parse import directive
         const match = directive.value.match(/#eat\s*(?:<(.+?)>|"(.+?)"|([a-zA-Z_][a-zA-Z0-9_]*\.(?:hat|yc)))/);
         if (!match) {
             console.log('[YankoviC Import] No match found for directive:', directive.value);
             return;
         }
         let filePath = match[1] || match[2] || match[3];
-        console.log('[YankoviC Import] Extracted filePath:', filePath);
-        
-        // Normalize import name for built-in libraries
+        // Enforce import rules
+        if (match[2] && !filePath.endsWith('.hat')) {
+            throw new Error('Import Error: Quoted imports only work for .hat files. Use #eat myfile.yc for .yc files.');
+        }
+        if (this.currentFilePath && !filePath.match(/^([/\\]|[a-zA-Z]:)/)) {
+            const base = this.currentFilePath.split('/').slice(0, -1).join('/');
+            filePath = base + '/' + filePath;
+            filePath = filePath.replace(/\\/g, '/').replace(/\/\//g, '/');
+            const parts = [];
+            for (const part of filePath.split('/')) {
+                if (part === '.' || part === '') continue;
+                if (part === '..') parts.pop();
+                else parts.push(part);
+            }
+            filePath = parts.join('/');
+        }
+        // console.log('[YankoviC Import] Final resolved file path for import:', filePath);
         const normalized = filePath.toLowerCase().replace(/\.(hat|yc)(\.js)?$/, '');
-        console.log('[YankoviC Import] Normalized name:', normalized);
-        
         const builtins = {
             'uhf': () => this.loadUHF(scope),
             'albuquerque': () => this.loadMath(scope),
@@ -784,105 +756,118 @@ export class YankoviCInterpreter {
             'weird_wide_web': () => this.loadWeirdWideWeb(scope),
             'virus_alert': () => this.loadVirusAlert(scope)
         };
-        
         if (builtins[normalized]) {
-            console.log('[YankoviC Import] Loading built-in library:', normalized);
+            // console.log('[YankoviC Import] Loading built-in library:', normalized);
             return builtins[normalized]();
-        } else {
-            console.log('[YankoviC Import] Not a built-in, attempting user file import for:', filePath);
-            
-            // Try .hat first, then .yc for user files
-            let triedHat = false;
-            let triedYc = false;
-            let lastError = null;
-            
-            for (const ext of ['.hat', '.yc']) {
-                if (filePath.endsWith(ext)) {
-                    try {
-                        console.log('[YankoviC Import] Trying file with existing extension:', filePath);
-                        if (this.imports.has(filePath)) {
-                            console.log('[YankoviC Import] File already imported, skipping:', filePath);
-                            return;
-                        }
-                        this.imports.set(filePath, true);
-                        console.log('[YankoviC Import] Fetching content for:', filePath);
-                        const content = await getFileContent(this.projectName, filePath);
-                        console.log('[YankoviC Import] Content received, length:', content.length);
-                        console.log('[YankoviC Import] First 200 chars:', content.slice(0, 200));
-                        
-                        const tokens = this.lexer(content);
-                        console.log('[YankoviC Import] Tokenized, token count:', tokens.length);
-                        console.log('[YankoviC Import] First 10 tokens:', tokens.slice(0, 10));
-                        
-                        const oldState = { pos: this.pos, tokens: this.tokens };
-                        this.tokens = tokens;
-                        this.pos = 0;
-                        
-                        console.log('[YankoviC Import] About to parse imported file...');
-                        const ast = this.parseProgram();
-                        console.log('[YankoviC Import] Parsed successfully, interpreting...');
-                        
-                        await this.interpret(ast, scope);
-                        this.tokens = oldState.tokens;
-                        this.pos = oldState.pos;
-                        console.log('[YankoviC Import] Import completed successfully');
-                        return;
-                    } catch (error) {
-                        console.error('[YankoviC Import] Error importing file:', filePath, error);
-                        lastError = error;
-                        if (ext === '.hat') triedHat = true;
-                        if (ext === '.yc') triedYc = true;
+        }
+        // User file import (recursive)
+        for (const ext of ['.hat', '.yc']) {
+            let importPath = filePath;
+            if (!importPath.endsWith(ext)) importPath = importPath.replace(/\.(hat|yc)$/, ext);
+            if (this.imports.has(importPath)) {
+                // console.log('[YankoviC Import] File already imported, skipping:', importPath);
+                return;
+            }
+            try {
+                this.imports.set(importPath, true);
+                const content = await getFileContent(this.projectName, importPath);
+                // Recursively scan for #eat directives in the imported file
+                const importTokens = this.lexer(content);
+                for (let i = 0; i < importTokens.length; i++) {
+                    if (importTokens[i].type === 'DIRECTIVE') {
+                        await this.processImport({ value: importTokens[i].value }, scope);
                     }
                 }
+                // Parse and interpret the imported file
+                const oldState = { pos: this.pos, tokens: this.tokens, currentFilePath: this.currentFilePath };
+                this.tokens = importTokens;
+                this.pos = 0;
+                this.currentFilePath = importPath;
+                const ast = this.parseProgram();
+                await this.interpret(ast, scope);
+                this.tokens = oldState.tokens;
+                this.pos = oldState.pos;
+                this.currentFilePath = oldState.currentFilePath;
+                // console.log('[YankoviC Import] Import completed successfully:', importPath);
+                return;
+            } catch (error) {
+                console.error('[YankoviC Import] Error importing file:', importPath, error);
             }
-            
-            // If not found, try both extensions
-            if (!triedHat) {
-                try {
-                    const hatPath = filePath.replace(/\.(yc)$/, '.hat');
-                    console.log('[YankoviC Import] Trying .hat extension:', hatPath);
-                    if (this.imports.has(hatPath)) return;
-                    this.imports.set(hatPath, true);
-                    const content = await getFileContent(this.projectName, hatPath);
-                    const tokens = this.lexer(content);
-                    const oldState = { pos: this.pos, tokens: this.tokens };
-                    this.tokens = tokens;
-                    this.pos = 0;
-                    const ast = this.parseProgram();
-                    await this.interpret(ast, scope);
-                    this.tokens = oldState.tokens;
-                    this.pos = oldState.pos;
-                    return;
-                } catch (error) { 
-                    console.error('[YankoviC Import] .hat attempt failed:', error);
-                    lastError = error; 
-                }
+        }
+        throw new Error(`Import Error: Failed to import user file '${filePath}': File not found or invalid import syntax.`);
+    }
+
+    // --- Built-in Math Library: Albuquerque ---
+    loadMath(scope) {
+        // Trig functions
+        scope.set('sin', { type: 'NativeFunction', call: (args) => Math.sin(args[0]) });
+        scope.set('cos', { type: 'NativeFunction', call: (args) => Math.cos(args[0]) });
+        scope.set('tan', { type: 'NativeFunction', call: (args) => Math.tan(args[0]) });
+        scope.set('asin', { type: 'NativeFunction', call: (args) => Math.asin(args[0]) });
+        scope.set('acos', { type: 'NativeFunction', call: (args) => Math.acos(args[0]) });
+        scope.set('atan', { type: 'NativeFunction', call: (args) => Math.atan(args[0]) });
+        // Exponentials and roots
+        scope.set('pow', { type: 'NativeFunction', call: (args) => Math.pow(args[0], args[1]) });
+        scope.set('sqrt', { type: 'NativeFunction', call: (args) => Math.sqrt(args[0]) });
+        scope.set('abs', { type: 'NativeFunction', call: (args) => Math.abs(args[0]) });
+        // Rounding
+        scope.set('floor', { type: 'NativeFunction', call: (args) => Math.floor(args[0]) });
+        scope.set('ceil', { type: 'NativeFunction', call: (args) => Math.ceil(args[0]) });
+        scope.set('round', { type: 'NativeFunction', call: (args) => Math.round(args[0]) });
+        // Random and modulo
+        scope.set('random_spatula', { type: 'NativeFunction', call: () => Math.floor(Math.random() * 100) });
+        scope.set('yoda', { type: 'NativeFunction', call: (args) => args[0] % args[1] });
+        // Constants
+        scope.set('PI', { type: 'NativeFunction', call: () => Math.PI });
+        scope.set('E', { type: 'NativeFunction', call: () => Math.E });
+        // Weird Al–themed aliases (for fun)
+        scope.set('eat_a_spam', { type: 'NativeFunction', call: (args) => Math.abs(args[0]) });
+        scope.set('like_a_surgeon', { type: 'NativeFunction', call: (args) => Math.sqrt(args[0]) });
+        scope.set('dare_to_be_stupid', { type: 'NativeFunction', call: (args) => Math.random() });
+    }
+
+    // --- Built-in UHF Graphics Library ---
+    loadUHF(scope) {
+        // Import all functions/constants from UHF_LIBRARY into the given scope
+        for (const [name, value] of Object.entries(UHF_LIBRARY)) {
+            // If it's a function, bind 'this' to the interpreter for UI state access
+            if (value && typeof value === 'object' && value.type === 'NativeFunction') {
+                // Bind interpreter context for UI state, draw buffer, etc.
+                scope.set(name, { ...value, call: value.call.bind(this) });
+            } else {
+                scope.set(name, value);
             }
-            
-            if (!triedYc) {
-                try {
-                    const ycPath = filePath.replace(/\.(hat)$/, '.yc');
-                    console.log('[YankoviC Import] Trying .yc extension:', ycPath);
-                    if (this.imports.has(ycPath)) return;
-                    this.imports.set(ycPath, true);
-                    const content = await getFileContent(this.projectName, ycPath);
-                    const tokens = this.lexer(content);
-                    const oldState = { pos: this.pos, tokens: this.tokens };
-                    this.tokens = tokens;
-                    this.pos = 0;
-                    const ast = this.parseProgram();
-                    await this.interpret(ast, scope);
-                    this.tokens = oldState.tokens;
-                    this.pos = oldState.pos;
-                    return;
-                } catch (error) { 
-                    console.error('[YankoviC Import] .yc attempt failed:', error);
-                    lastError = error; 
-                }
+        }
+    }
+
+    // --- Built-in Like_a_Server Library ---
+    loadLikeAServer(scope) {
+        for (const [name, value] of Object.entries(LIKE_A_SERVER_LIBRARY)) {
+            if (value && typeof value === 'object' && value.type === 'NativeFunction') {
+                scope.set(name, { ...value, call: value.call.bind(this) });
+            } else {
+                scope.set(name, value);
             }
-            
-            console.error('[YankoviC Import] All import attempts failed for:', filePath);
-            throw new Error(`Import Error: Failed to import user file '${filePath}': ${lastError ? lastError.message : 'File not found'}`);
+        }
+    }
+    // --- Built-in Weird_Wide_Web Library ---
+    loadWeirdWideWeb(scope) {
+        for (const [name, value] of Object.entries(WEIRD_WIDE_WEB_LIBRARY)) {
+            if (value && typeof value === 'object' && value.type === 'NativeFunction') {
+                scope.set(name, { ...value, call: value.call.bind(this) });
+            } else {
+                scope.set(name, value);
+            }
+        }
+    }
+    // --- Built-in Virus_Alert Library ---
+    loadVirusAlert(scope) {
+        for (const [name, value] of Object.entries(VIRUS_ALERT_LIBRARY)) {
+            if (value && typeof value === 'object' && value.type === 'NativeFunction') {
+                scope.set(name, { ...value, call: value.call.bind(this) });
+            } else {
+                scope.set(name, value);
+            }
         }
     }
 }

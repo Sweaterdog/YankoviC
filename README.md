@@ -1,4 +1,4 @@
-# 🎵 YankoviC Programming Language v1.1.1 
+# 🎵 YankoviC Programming Language v1.2.0 
 
 *A Programming Language for those who "Dare to be stupid"*
 
@@ -68,7 +68,6 @@ spatula want_a_new_duck() {
 - npm or yarn
 
 ### Installation
-Git may lock your access to the code / folders in the project! In that case you must download the ZIP manually instead of running `git clone`
 Run the following command to install all dependencies, set up the environment, and add YankoviC to your PATH for global CLI use:
 
 ```bash
@@ -76,11 +75,6 @@ Run the following command to install all dependencies, set up the environment, a
 ```
 
 This installer only works for Linux (Maybe MacOS idk), windows users will have to open it up and do it all manually
-
-### To remove from PATH
-```bash
-./uninstall.sh
-```
 
 ### Starting the Accordion IDE
 You can run the accordion anywhere!
@@ -385,6 +379,19 @@ spatula yoda(spatula a, spatula b);          // Modulus operation (remainder)
 ```
 
 ## 📁 File Management & Imports
+
+### Import Rules (IMPORTANT!)
+- `#eat <library.hat>` or `#eat <library>`: Loads a built-in or user library. The extension is optional for built-ins.
+- `#eat "userlib.hat"`: Loads a user-made library file. **Quoted imports only work for .hat files!**
+- `#eat userlib.yc`: Loads a user-made code file. **Unquoted imports work for both .hat and .yc files.**
+- `#eat "userlib.yc"` is NOT valid and will not work.
+
+> **Summary:**
+> - Use quotes only for `.hat` files: `#eat "my_lib.hat"`
+> - For `.yc` files, do NOT use quotes: `#eat my_code.yc`
+> - Built-in libraries can be imported with or without extension and without quotes.
+
+If you try to import a `.yc` file with quotes, the interpreter will not find it!
 
 ### Hat Files (.hat)
 

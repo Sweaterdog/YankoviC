@@ -1,3 +1,35 @@
+// ===============================================
+// EYKIW OS - Notepad App
+// ===============================================
 #eat <UHF.hat>
 
-// ...existing code from notepad.yc...
+// Placeholder for a real notepad. In the future, this will allow editing text files!
+
+accordion_solo launch_notepad() {
+    spatula note_x = 340;
+    spatula note_y = 240;
+    spatula note_w = 600;
+    spatula note_h = 320;
+    start_the_show(note_w, note_h, "UHF Notepad");
+    set_polka_speed(60);
+    spatula frame = 0;
+    polka (!the_shows_over()) {
+        frame = frame + 1;
+        roll_the_camera();
+        // Notepad window background
+        pick_a_hawaiian_shirt(WHITE_ZOMBIE);
+        draw_a_spamsicle(0, 0, note_w, note_h);
+        // Title bar
+        pick_a_hawaiian_shirt(TWINKIE_GOLD);
+        draw_a_spamsicle(0, 0, note_w, 40);
+        pick_a_hawaiian_shirt(BLACK_MAGIC);
+        print_a_string_at("UHF Notepad", 30, 30);
+        // Placeholder: Render a fake text area
+        pick_a_hawaiian_shirt(SILVER_SPATULA);
+        draw_a_spamsicle(30, 60, note_w - 60, note_h - 120);
+        pick_a_hawaiian_shirt(BLACK_MAGIC);
+        print_a_string_at("(Text editing coming soon)", 50, 90);
+        that_is_a_wrap();
+    }
+    twinkie_wiener_sandwich 27;
+}

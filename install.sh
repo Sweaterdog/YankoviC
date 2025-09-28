@@ -30,8 +30,8 @@ fi
 # Add YankoviC to PATH for global CLI use
 if ! command -v yankovic &> /dev/null; then
   echo "Adding YankoviC to PATH..."
-  ln -sf $(pwd)/cli.js /usr/local/bin/yankovic
-  chmod +x /usr/local/bin/yankovic
+  sudo ln -sf $(pwd)/cli.js /usr/local/bin/yankovic
+  sudo chmod +x /usr/local/bin/yankovic
 fi
 
 echo "YankoviC installation and setup complete!"
