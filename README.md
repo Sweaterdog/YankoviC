@@ -1,4 +1,4 @@
-# 🎵 YankoviC Programming Language v1.2.0 
+# 🎵 YankoviC Programming Language 1.1.2 
 
 *A Programming Language for those who "Dare to be stupid"*
 
