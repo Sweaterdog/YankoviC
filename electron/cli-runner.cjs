@@ -4,6 +4,8 @@ const fs = require('fs');
 const http = require('http');
 const url = require('url');
 
+app.disableHardwareAcceleration();
+
 let uhfWindow = null;
 let gameLoopInterval = null;
 let uiState = { mouse: {}, keys: {}, buttons: {}, textBoxes: {}, checkboxes: {}, sliders: {} };
