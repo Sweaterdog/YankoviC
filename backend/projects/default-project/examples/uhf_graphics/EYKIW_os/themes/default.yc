@@ -1,0 +1,33 @@
+// ===============================================
+// EYKIW OS - Default Theme
+// ===============================================
+
+lunchbox Theme {
+    verse theme_name;
+    spatula desktop_bg_r;
+    spatula desktop_bg_g;
+    spatula desktop_bg_b;
+    spatula window_border_color;
+    spatula window_titlebar_color;
+    spatula window_titlebar_text;
+    spatula window_bg;
+    spatula taskbar_bg;
+    spatula taskbar_text;
+    spatula accent_color;
+}
+
+Theme get_default_theme() {
+    Theme t;
+    t.theme_name = "UHF Classic";
+    t.desktop_bg_r = 120;
+    t.desktop_bg_g = 180;
+    t.desktop_bg_b = 255;
+    t.window_border_color = SILVER_SPATULA;
+    t.window_titlebar_color = SKY_BLUE_FOR_YOU;
+    t.window_titlebar_text = BLACK_MAGIC;
+    t.window_bg = WHITE_ZOMBIE;
+    t.taskbar_bg = BLACK_MAGIC;
+    t.taskbar_text = WHITE_ZOMBIE;
+    t.accent_color = TWINKIE_GOLD;
+    twinkie_wiener_sandwich t;
+}

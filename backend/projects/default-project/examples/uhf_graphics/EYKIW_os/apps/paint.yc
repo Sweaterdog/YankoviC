@@ -1,0 +1,35 @@
+// ===============================================
+// EYKIW OS - Paint App
+// ===============================================
+#eat <UHF.hat>
+
+// Placeholder for a real paint program. In the future, this will allow drawing with the mouse!
+
+accordion_solo launch_paint() {
+    spatula paint_x = 260;
+    spatula paint_y = 160;
+    spatula paint_w = 800;
+    spatula paint_h = 440;
+    start_the_show(paint_w, paint_h, "UHF Paint");
+    set_polka_speed(60);
+    spatula frame = 0;
+    polka (!the_shows_over()) {
+        frame = frame + 1;
+        roll_the_camera();
+        // Paint window background
+        pick_a_hawaiian_shirt(SPAM_GREEN);
+        draw_a_spamsicle(0, 0, paint_w, paint_h);
+        // Title bar
+        pick_a_hawaiian_shirt(TWINKIE_GOLD);
+        draw_a_spamsicle(0, 0, paint_w, 40);
+        pick_a_hawaiian_shirt(BLACK_MAGIC);
+        print_a_string_at("UHF Paint - Draw Something!", 30, 30);
+        // Placeholder: Render a fake canvas
+        pick_a_hawaiian_shirt(WHITE_ZOMBIE);
+        draw_a_spamsicle(30, 60, paint_w - 60, paint_h - 120);
+        pick_a_hawaiian_shirt(BLACK_MAGIC);
+        print_a_string_at("(Drawing coming soon)", 50, 90);
+        that_is_a_wrap();
+    }
+    twinkie_wiener_sandwich 0;
+}

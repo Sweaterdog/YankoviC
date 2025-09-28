@@ -1,0 +1,19 @@
+{
+  "name": "the-accordion-ide",
+  "version": "1.0.0",
+  "description": "The official IDE for the YankoviC programming language.",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "cli": "node cli.js",
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^31.0.1"
+  },
+  "dependencies": {
+    "canvas": "^3.1.2",
+    "open": "^10.1.2",
+    "readline-sync": "^1.4.10"
+  }
+}

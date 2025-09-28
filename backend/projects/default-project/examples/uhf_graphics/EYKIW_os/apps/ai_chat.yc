@@ -1,0 +1,23 @@
+// EYKIW_os AI Chat App
+#eat <UHF.hat>
+#eat <albuquerque.hat>
+#eat <like_a_server.hat>
+#eat <weird_wide_web.hat>
+
+spatula ai_chat_main() {
+    verse user_input = "";
+    verse ai_response = "";
+    perform_a_parody("Welcome to EYKIW_os AI Chat! Type your message below.");
+    jeopardy(its_a_fact) {
+        perform_a_parody("You: ");
+        user_input = ask_the_audience();
+        jeopardy(user_input == "exit" || user_input == "quit") {
+            perform_a_parody("Goodbye!");
+            twinkie_wiener_sandwich 0;
+        }
+        // Call amish_mail for AI chat (model, API key, and system prompt are optional)
+        ai_response = amish_mail(user_input, "openai"); // You can pass a custom system prompt as the 4th argument
+        perform_a_parody("AI: " + ai_response);
+    }
+    twinkie_wiener_sandwich 27;
+}

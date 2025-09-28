@@ -1,0 +1,170 @@
+#!/usr/bin/env node
+// YankoviC Global CLI - The Accordion Programming Language
+// This is the global entry point for the YankoviC command-line interface
+
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { spawn } from 'child_process';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+async function main() {
+    // Check for special IDE flags first
+    const args = process.argv.slice(2);
+
+    if (args.includes('--accordion') || args.includes('--ide')) {
+        console.log('🪗 Opening The Accordion IDE...');
+        
+        // Check if start.sh exists and is executable
+        const startScript = path.join(__dirname, 'start.sh');
+        
+        if (fs.existsSync(startScript)) {
+            console.log('🎵 Launching The Accordion IDE with start.sh...');
+            
+            const child = spawn('./start.sh', [], {
+                cwd: __dirname,
+                stdio: 'inherit',
+                detached: false
+            });
+            
+            child.on('error', (err) => {
+                console.error('❌ Failed to launch start.sh:', err.message);
+                console.error('💡 Try running: cd /home/sweaterdog/Desktop/Coding_projects/YankoviC && ./start.sh');
+                process.exit(1);
+            });
+            
+            child.on('close', (code) => {
+                if (code !== 0) {
+                    console.error(`❌ start.sh exited with code ${code}`);
+                }
+                process.exit(code || 0);
+            });
+            
+            // Keep the process alive while the child runs
+            return;
+            
+        } else {
+            console.error('❌ start.sh not found in YankoviC directory');
+            console.error('💡 Make sure you\'re running from the correct YankoviC installation');
+            process.exit(1);
+        }
+    }
+
+    // If no special flags, handle as regular YankoviC CLI
+    if (args.length === 0) {
+        printHelp();
+        process.exit(1);
+    }
+
+function printHelp() {
+    console.log('🎵 YankoviC - The Accordion Programming Language 🎵');
+    console.log('');
+    console.log('Usage: yankovic <file.yc> [options]');
+    console.log('       yankovic --accordion    # Open The Accordion IDE');
+    console.log('       yankovic --ide          # Open The Accordion IDE');
+    console.log('');
+    console.log('📺 UHF Channel Options (Display Modes):');
+    console.log('  --channel=1   or --headless   📻 API Mode (No Display)');
+    console.log('  --channel=3   or --ascii      🖥️  Terminal ASCII Display (default)');
+    console.log('  --channel=13  or --png        🖼️  PNG File Output');
+    console.log('  --channel=62  or --electron   📺 Standard Display Mode (Electron)');
+    console.log('');
+    console.log('🎨 ASCII Display Options:');
+    console.log('  --hires                       🌈 High-Resolution Terminal Display');
+    console.log('                                   (24-bit color, Unicode blocks)');
+    console.log('');
+    console.log('⚙️ Other Options:');
+    console.log('  --max-frames=N: Limit number of frames (default: unlimited)');
+    console.log('  --version:      Show version information');
+    console.log('  --help:         Show this help message');
+    console.log('');
+    console.log('🎸 Examples:');
+    console.log('  yankovic calculator.yc --ascii');
+    console.log('  yankovic calculator.yc --ascii --hires');
+    console.log('  yankovic ~/projects/my-app.yc --png');
+    console.log('  yankovic examples/EYKIW_os.yc --electron');
+    console.log('');
+    console.log('🎬 Demo all channels: yankovic-demo');
+    console.log('🪗 Open IDE: yankovic --accordion');
+}
+    // Handle version flag
+    if (args.includes('--version')) {
+        const packagePath = path.join(__dirname, 'package.json');
+        if (fs.existsSync(packagePath)) {
+            const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf-8'));
+            console.log(`YankoviC v${pkg.version} - The Accordion Programming Language`);
+            console.log('🎵 Making programming weird since 2024! 🎵');
+        } else {
+            console.log('YankoviC - The Accordion Programming Language');
+        }
+        process.exit(0);
+    }
+
+    // Handle help flag
+    if (args.includes('--help')) {
+        // Show the same help as no args
+        console.log('🎵 YankoviC - The Accordion Programming Language 🎵');
+        console.log('');
+        console.log('Usage: yankovic <file.yc> [options]');
+        console.log('       yankovic --accordion    # Open The Accordion IDE');
+        console.log('       yankovic --ide          # Open The Accordion IDE');
+        console.log('');
+        console.log('📺 UHF Channel Options (Display Modes):');
+        console.log('  --channel=1   or --headless   📻 API Mode (No Display)');
+        console.log('  --channel=3   or --ascii      🖥️  Terminal ASCII Display (default)');
+        console.log('  --channel=13  or --png        🖼️  PNG File Output');
+        console.log('  --channel=62  or --electron   📺 Standard Display Mode (Electron)');
+        console.log('');
+        console.log('🎨 ASCII Display Options:');
+        console.log('  --hires                       🌈 High-Resolution Terminal Display');
+        console.log('                                   (24-bit color, Unicode blocks)');
+        console.log('');
+        console.log('⚙️ Other Options:');
+        console.log('  --max-frames=N: Limit number of frames (default: unlimited)');
+        console.log('  --version:      Show version information');
+        console.log('  --help:         Show this help message');
+        console.log('');
+        console.log('🎸 Examples:');
+        console.log('  yankovic calculator.yc --ascii');
+        console.log('  yankovic calculator.yc --ascii --hires');
+        console.log('  yankovic ~/projects/my-app.yc --png');
+        console.log('  yankovic examples/EYKIW_os.yc --electron');
+        console.log('');
+        console.log('🎬 Demo all channels: yankovic-demo');
+        console.log('🪗 Open IDE: yankovic --accordion');
+        process.exit(0);
+    }
+
+    // For regular file execution, delegate to the existing CLI
+    console.log('🎵 YankoviC CLI v2024-07-05-YODA-RENAME-v3 🎵');
+
+    // Import and run the existing CLI logic
+    try {
+        // Dynamically import the CLI module
+        const cliPath = path.join('/home/sweaterdog/Desktop/Coding_projects/YankoviC', 'cli.js');
+        
+        // The CLI expects process.argv to include the file path and args
+        // We need to reconstruct this for the existing CLI
+        process.argv = [
+            process.argv[0], // node
+            cliPath,         // cli.js path
+            ...args          // user arguments
+        ];
+        
+        // Import and execute the CLI
+        await import(cliPath);
+        
+    } catch (error) {
+        console.error('❌ Error running YankoviC CLI:', error.message);
+        console.error('💡 Make sure you\'re in the YankoviC directory or have it properly installed.');
+        process.exit(1);
+    }
+}
+
+// Run the main function
+main().catch(error => {
+    console.error('❌ Fatal error:', error.message);
+    process.exit(1);
+});

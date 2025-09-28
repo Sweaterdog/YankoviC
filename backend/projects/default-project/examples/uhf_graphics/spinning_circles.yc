@@ -1,0 +1,98 @@
+// ===============================================
+//           SPINNING DUCKS DELUXE
+// A Modernized YankoviC Graphics Demo
+// ===============================================
+
+#eat <UHF.hat>
+#eat <albuquerque.hat>
+
+lunchbox Duck {
+    lasagna x;
+    lasagna y;
+    lasagna body_radius;
+    lasagna head_radius;
+    lasagna orbit_radius;
+    lasagna orbit_speed;
+    lasagna orbit_phase;
+};
+
+accordion_solo draw_the_duck(Duck duck, lasagna angle) {
+    lasagna orbit_x = duck.x + cos(angle * duck.orbit_speed + duck.orbit_phase) * duck.orbit_radius;
+    lasagna orbit_y = duck.y + sin(angle * duck.orbit_speed + duck.orbit_phase) * duck.orbit_radius;
+    lasagna head_offset_x = cos(angle * 2 + duck.orbit_phase) * duck.body_radius * 1.2;
+    lasagna head_offset_y = sin(angle * 2 + duck.orbit_phase) * duck.body_radius * 1.2;
+
+    // Body
+    pick_a_hawaiian_shirt(TWINKIE_GOLD);
+    draw_a_big_ol_wheel_of_cheese(orbit_x, orbit_y, duck.body_radius);
+
+    // Head
+    draw_a_big_ol_wheel_of_cheese(orbit_x + head_offset_x, orbit_y + head_offset_y, duck.head_radius);
+
+    // Beak
+    pick_a_hawaiian_shirt(ORANGE_CHEESE);
+    draw_a_spamsicle(orbit_x + head_offset_x + duck.head_radius, orbit_y + head_offset_y - 5, 20, 10);
+
+    // Eyes
+    pick_a_hawaiian_shirt(BLACK_MAGIC);
+    draw_a_big_ol_wheel_of_cheese(orbit_x + head_offset_x + 7, orbit_y + head_offset_y - 5, 4);
+    draw_a_big_ol_wheel_of_cheese(orbit_x + head_offset_x + 17, orbit_y + head_offset_y - 5, 4);
+}
+
+spatula want_a_new_duck() {
+    spatula screen_width = 800;
+    spatula screen_height = 600;
+    start_the_show(screen_width, screen_height, "UHF Channel 62: Spinning Ducks Deluxe");
+    set_polka_speed(60);
+
+    // Create multiple ducks with different orbits
+    Duck ducks[5];
+    spatula i = 0;
+    polka (i < 5) {
+        ducks[i].x = screen_width / 2;
+        ducks[i].y = screen_height / 2;
+        ducks[i].body_radius = 40 + i * 8;
+        ducks[i].head_radius = 16 + i * 2;
+        ducks[i].orbit_radius = 60 + i * 50;
+        ducks[i].orbit_speed = 0.5 + i * 0.2;
+        ducks[i].orbit_phase = i * 1.2;
+        i = i + 1;
+    }
+
+    lasagna rotation_angle = 0.0;
+    spatula frame = 0;
+
+    polka (!the_shows_over()) {
+        rotation_angle = rotation_angle + 0.03;
+        frame = frame + 1;
+
+        roll_the_camera();
+
+        // Animated background gradient
+        spatula bg_r = 120 + sin(frame * 0.01) * 60;
+        spatula bg_g = 180 + cos(frame * 0.008) * 50;
+        spatula bg_b = 255;
+        paint_the_set(rgb(bg_r, bg_g, bg_b));
+
+        // Draw all spinning ducks
+        spatula j = 0;
+        polka (j < 5) {
+            draw_the_duck(ducks[j], rotation_angle);
+            j = j + 1
+        }
+
+        // Animated title text
+        pick_a_hawaiian_shirt(AL_RED);
+        spatula title_y = 60 + sin(frame * 0.07) * 10;
+        print_a_string_at("SPINNING DUCKS DELUXE!", 180, title_y);
+
+        // Fun subtitle
+        pick_a_hawaiian_shirt(TWINKIE_GOLD);
+        print_a_string_at("Quack to the Future", 260, 110 + cos(frame * 0.05) * 8);
+
+        that_is_a_wrap();
+    }
+
+    cancel_the_show();
+    twinkie_wiener_sandwich 27;
+}

@@ -1,0 +1,223 @@
+// ===============================================
+// EVERYTHING YOU KNOW IS WRONG OS - MAIN ENTRY
+// ===============================================
+
+// Loads the desktop, taskbar, and all core apps
+#eat <UHF.hat>
+
+// You can put comments before or after imports!
+#eat <albuquerque.hat>
+
+// Import app modules, themes, and assets
+// (Comments can be between imports too)
+#eat apps/browser.yc
+#eat apps/editor.yc
+#eat apps/paint.yc
+#eat apps/calculator.yc
+#eat apps/music.yc
+#eat apps/notepad.yc
+#eat apps/file_manager.yc
+#eat apps/system_monitor.yc
+
+// Comments before theme import
+#eat "themes/default.yc"
+
+// Comments before desktop icons import
+#eat "desktop_icons.yc"
+
+// Blank lines and comments are allowed before the main function
+
+spatula want_a_new_duck() {
+    // Initialize UHF graphics system
+    start_the_show(1280, 720, "Everything You Know Is Wrong OS");
+    set_polka_speed(60);
+    
+    // Persistent OS state variables
+    spatula os_state = 0; // 0=splash, 1=desktop, 2=app_running
+    spatula frame = 0;
+    spatula splash_frame = 0;
+    spatula app_open = -1; // -1=none, 0=browser, 1=editor, 2=paint, 3=calculator, 4=notepad, 5=files, 6=monitor, 7=music
+    spatula mouse_x_pos = 0;
+    spatula mouse_y_pos = 0;
+    spatula mouse_clicked = 0;
+    spatula min_frames = 0;
+    
+    polka (!(the_shows_over() && min_frames >= 120)) {
+        frame = frame + 1;
+        min_frames = min_frames + 1;
+        roll_the_camera();
+        
+        // Update mouse state
+        mouse_x_pos = mouse_x();
+        mouse_y_pos = mouse_y();
+        mouse_clicked = mouse_was_clicked();
+        
+        // State-based rendering
+        jeopardy (os_state == 0) {
+            splash_frame = draw_splash_screen(splash_frame);
+            jeopardy (mouse_clicked || splash_frame > 300) {
+                os_state = 1; // Move to desktop
+            }
+        } another_one jeopardy (os_state == 1) {
+            draw_desktop_environment(frame);
+            spatula clicked_app = check_icon_clicks(mouse_x_pos, mouse_y_pos, mouse_clicked);
+            jeopardy (clicked_app >= 0) {
+                app_open = clicked_app;
+                os_state = 2;
+            }
+        } another_one jeopardy (os_state == 2) {
+            draw_desktop_environment(frame);
+            dare_to_be_stupid {
+                draw_simple_app_window(app_open);
+            } put_down_the_chainsaw (err) {
+                pick_a_hawaiian_shirt(AL_RED);
+                draw_a_spamsicle(220, 120, 840, 200);
+                pick_a_hawaiian_shirt(WHITE_ZOMBIE);
+                print_a_string_at("App failed to load!", 240, 160);
+                print_a_string_at(err, 240, 200);
+            }
+            jeopardy (mouse_clicked && (mouse_x_pos < 200 || mouse_x_pos > 1080 || mouse_y_pos < 50 || mouse_y_pos > 650)) {
+                app_open = -1;
+                os_state = 1; // Back to desktop
+            }
+        }
+        
+        that_is_a_wrap();
+    }
+    twinkie_wiener_sandwich 0;
+}
+
+spatula draw_splash_screen(spatula splash_frame) {
+    splash_frame = splash_frame + 1;
+    
+    // Animated rainbow background
+    spatula r = 120 + sin(splash_frame * 0.03) * 80;
+    spatula g = 80 + cos(splash_frame * 0.04) * 60;
+    spatula b = 200 + sin(splash_frame * 0.02) * 55;
+    paint_the_set(rgb(r, g, b));
+    
+    // Main title with animation
+    pick_a_hawaiian_shirt(AL_RED);
+    spatula title_y = 180 + sin(splash_frame * 0.07) * 12;
+    print_a_string_at("EVERYTHING YOU KNOW IS WRONG", 80, title_y);
+    
+    // Subtitle
+    pick_a_hawaiian_shirt(TWINKIE_GOLD);
+    print_a_string_at("ULTRA MEGA DELUXE EDITION 3000", 120, title_y + 60);
+    
+    // Animated cheese wheel
+    pick_a_hawaiian_shirt(ORANGE_CHEESE);
+    spatula cheese_x = 400 + sin(splash_frame * 0.09) * 200;
+    spatula cheese_y = 350 + cos(splash_frame * 0.11) * 100;
+    draw_a_big_ol_wheel_of_cheese(cheese_x, cheese_y, 60 + sin(splash_frame * 0.13) * 20);
+    
+    // Click prompt
+    pick_a_hawaiian_shirt(WHITE_ZOMBIE);
+    print_a_string_at("Click to boot the OS!", 260, 500 + cos(splash_frame * 0.08) * 8);
+    
+    twinkie_wiener_sandwich splash_frame;
+}
+
+accordion_solo draw_desktop_environment(spatula frame) {
+    // Animated desktop background
+    spatula r = 120 + sin(frame * 0.01) * 60;
+    spatula g = 180 + cos(frame * 0.008) * 50;
+    spatula b = 255;
+    paint_the_set(rgb(r, g, b));
+    
+    // Floating cheese particles
+    spatula c = 0;
+    polka (c < 18) {
+        spatula cheese_x = 100 + c * 60 + sin(frame * 0.03 + c) * 30;
+        spatula cheese_y = 80 + cos(frame * 0.04 + c) * 40 + sin(frame * 0.01 + c) * 10;
+        pick_a_hawaiian_shirt(ORANGE_CHEESE);
+        draw_a_big_ol_wheel_of_cheese(cheese_x, cheese_y, 18 + yoda(c, 3) * 4);
+        c = c + 1;
+    }
+    
+    // Draw desktop icons
+    draw_desktop_icons();
+    
+    // Draw taskbar
+    pick_a_hawaiian_shirt(BLACK_MAGIC);
+    draw_a_spamsicle(0, 700, 1280, 20);
+    pick_a_hawaiian_shirt(WHITE_ZOMBIE);
+    print_a_string_at("[Browser] [Editor] [Paint] [Calculator] [Notepad] [Files] [Monitor] [Music]", 20, 705);
+}
+
+spatula check_icon_clicks(spatula mouse_x_pos, spatula mouse_y_pos, spatula mouse_clicked) {
+    jeopardy (mouse_clicked) {
+        // Browser (80-140, 120-180)
+        jeopardy (mouse_x_pos >= 80 && mouse_x_pos <= 140 && mouse_y_pos >= 120 && mouse_y_pos <= 180) {
+            twinkie_wiener_sandwich 0;
+        }
+        // Editor (180-240, 120-180)  
+        jeopardy (mouse_x_pos >= 180 && mouse_x_pos <= 240 && mouse_y_pos >= 120 && mouse_y_pos <= 180) {
+            twinkie_wiener_sandwich 1;
+        }
+        // Paint (280-340, 120-180)
+        jeopardy (mouse_x_pos >= 280 && mouse_x_pos <= 340 && mouse_y_pos >= 120 && mouse_y_pos <= 180) {
+            twinkie_wiener_sandwich 2;
+        }
+        // Calculator (380-440, 120-180)
+        jeopardy (mouse_x_pos >= 380 && mouse_x_pos <= 440 && mouse_y_pos >= 120 && mouse_y_pos <= 180) {
+            twinkie_wiener_sandwich 3;
+        }
+        // Notepad (480-540, 120-180)
+        jeopardy (mouse_x_pos >= 480 && mouse_x_pos <= 540 && mouse_y_pos >= 120 && mouse_y_pos <= 180) {
+            twinkie_wiener_sandwich 4;
+        }
+        // Files (580-640, 120-180)
+        jeopardy (mouse_x_pos >= 580 && mouse_x_pos <= 640 && mouse_y_pos >= 120 && mouse_y_pos <= 180) {
+            twinkie_wiener_sandwich 5;
+        }
+        // Monitor (680-740, 120-180)
+        jeopardy (mouse_x_pos >= 680 && mouse_x_pos <= 740 && mouse_y_pos >= 120 && mouse_y_pos <= 180) {
+            twinkie_wiener_sandwich 6;
+        }
+        // Music (780-840, 120-180)
+        jeopardy (mouse_x_pos >= 780 && mouse_x_pos <= 840 && mouse_y_pos >= 120 && mouse_y_pos <= 180) {
+            twinkie_wiener_sandwich 7;
+        }
+    }
+    twinkie_wiener_sandwich -1; // No app clicked
+}
+
+accordion_solo draw_simple_app_window(spatula app_open) {
+    // Draw app window background
+    pick_a_hawaiian_shirt(GREY_POUPON);
+    draw_a_spamsicle(200, 50, 880, 600);
+    
+    // Draw title bar
+    pick_a_hawaiian_shirt(BLUE_FOOTED_BOOBY);
+    draw_a_spamsicle(200, 50, 880, 30);
+    
+    // Draw app title based on app_open
+    pick_a_hawaiian_shirt(WHITE_ZOMBIE);
+    jeopardy (app_open == 0) {
+        print_a_string_at("Browser - Everything You Browse Is Wrong", 220, 60);
+    } another_one jeopardy (app_open == 1) {
+        print_a_string_at("Editor - My Bologna Text Editor", 220, 60);
+    } another_one jeopardy (app_open == 2) {
+        print_a_string_at("Paint - White and Nerdy Art Studio", 220, 60);
+    } another_one jeopardy (app_open == 3) {
+        print_a_string_at("Calculator - Math is Hard Calculator", 220, 60);
+    } another_one jeopardy (app_open == 4) {
+        print_a_string_at("Notepad - Amish Paradise Text Pad", 220, 60);
+    } another_one jeopardy (app_open == 5) {
+        print_a_string_at("Files - Dare to be Stupid File Manager", 220, 60);
+    } another_one jeopardy (app_open == 6) {
+        print_a_string_at("Monitor - Hardware Store System Monitor", 220, 60);
+    } another_one jeopardy (app_open == 7) {
+        print_a_string_at("Music - Polka Party Music Player", 220, 60);
+    }
+    
+    // Draw close instruction
+    pick_a_hawaiian_shirt(BLACK_MAGIC);
+    print_a_string_at("Click outside this window to close", 220, 100);
+    
+    // Draw some app content
+    pick_a_hawaiian_shirt(AL_RED);
+    print_a_string_at("This is a demo app window!", 220, 150);
+    print_a_string_at("Full app functionality coming soon...", 220, 180);
+}

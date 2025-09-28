@@ -1,0 +1,35 @@
+// ===============================================
+//           BOUNCING SPATULA (Modernized)
+// ===============================================
+#eat <UHF.hat>
+#eat <albuquerque.hat>
+
+spatula want_a_new_duck() {
+    start_the_show(800, 600, "Bouncing Spatula");
+    set_polka_speed(60);
+
+    lasagna x = 400.0;
+    lasagna y = 100.0;
+    lasagna y_speed = 0.0;
+    lasagna gravity = 0.5;
+    lasagna bounce_factor = -0.8;
+
+    polka (!the_shows_over()) {
+        roll_the_camera();
+        paint_the_set(SKY_BLUE_FOR_YOU);
+        pick_a_hawaiian_shirt(SILVER_SPATULA);
+        draw_a_spamsicle(x-10, y-40, 20, 60); // Draw spatula handle
+        pick_a_hawaiian_shirt(WHITE_ZOMBIE);
+        draw_a_big_ol_wheel_of_cheese(x, y, 20); // Draw spatula head
+        pick_a_hawaiian_shirt(BLACK_MAGIC);
+        print_a_string_at("Bouncing Spatula!", 320, 40);
+        y_speed = y_speed + gravity;
+        y = y + y_speed;
+        jeopardy (y > 540) {
+            y = 540;
+            y_speed = y_speed * bounce_factor;
+        }
+        that_is_a_wrap();
+    }
+    twinkie_wiener_sandwich 27;
+}
